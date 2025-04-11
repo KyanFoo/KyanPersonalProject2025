@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace KyanPersonalProject.PersonalCharacterControls
@@ -32,6 +33,9 @@ namespace KyanPersonalProject.PersonalCharacterControls
         [Header("Keybinds")]
         public KeyCode jumpKey = KeyCode.Space;
         public KeyCode sprintKey = KeyCode.LeftShift;
+
+        [Header("Text")]
+        public TextMeshProUGUI text_speed;
 
         [Header("Others")]
         public Transform orientation;
@@ -71,6 +75,7 @@ namespace KyanPersonalProject.PersonalCharacterControls
             MyInput();
             SpeedControl();
             StateHandler();
+            TextStuff();
 
             // Handle Drag (Have some friction so that the character is not moving too fast).
             if (grounded)
@@ -224,6 +229,17 @@ namespace KyanPersonalProject.PersonalCharacterControls
         private Vector3 GetSlopeMoveDirection()
         {
             return Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
+        }
+
+        private void TextStuff()
+        {
+            Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+            if (OnSlope())
+                text_speed.SetText("Speed: " + Mathf.Round(rb.velocity.magnitude) + " / " + Mathf.Round(moveSpeed));
+
+            else
+                text_speed.SetText("Speed: " + Mathf.Round(flatVel.magnitude) + " / " + Mathf.Round(moveSpeed));
         }
     }
 }
