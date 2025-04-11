@@ -1,0 +1,61 @@
+Unity (KyanPersonalProject2025)
+
+CharacterControl 1:
+Youtube Video "FIRST PERSON MOVEMENT in Unity - FPS Controller" (Brackeys)
+1. Player uses "Character Controller". (??)
+
+CharMovement Script:
+- CharMovement Script, allowing the player to walk, sprint, jump.
+
+- Makeshift Gravity Control in the CharMovement script, allowing the player to experience gravity, falling down from heights
+
+MouseLook Script:
+- Simple PlayerCam Script to move player cam in First-Person Prespective.
+- Shit Script, when play scene, the script calculated mouse's position, causing the player's cam to face down. (Solution: Press "Ctrl + P" to play scene, so that your mouse position does not change,
+
+-----------------------------------------------------------------------------------------------
+CharacterControl 2:
+Youtube Video "THIRD PERSON MOVEMENT in Unity" (Brackeys)
+1. Player uses "Character Controller". (??)
+2. Player uses "ThirdPersonMovement" script. Simple C# script for player movement. (O)
+3. Player uses "Cinemachine" for Third-Prespective Camera.
+4. Cinemachine C# coding is a bit different and confusing not familair with it. (X)
+
+ThirdPersonMovement Script:
+- ThirdPersonMovement Script control both player movement and player camera.
+
+- Cam script to snap the player cam to the direction the player is going.
+
+----------------------------------------------------------------------------------------------
+CharacterControl 3:
+Youtube Video "FIRST PERSON MOVEMENT in 10 MINUTES - Unity Tutorial"
+1. Player uses "Rigidbody". (??)
+2. Makeshift player that can use both First-person and Third-person Prespective. (O)
+
+MoveCamera Script:
+- Simple One-Liner MoveCamera Script to move Camera Object to Camera Position.
+
+PlayerCam Script:
+- Simple PlayerCam Script to move player cam in First-Person Prespective.
+
+- Similar to "MouseLook" script in CharacterControl 1.
+
+PlayerMovement Script:
+- Almost All-Rounder PlayerMovement Script, allowing the player to walk, sprint, jump and slope movement.
+
+- Ground Check to ensure that player is grounded before jumping and variables to effect the jumps.
+
+- Slope Check to ensure that gravity is not effecting the player when on slope so they are not slipping down and not bouncing up when climbing up the slope.
+
+-----------------------------------------------------------------------------------------------
+CharacterControl 4:
+Youtube Video "THIRD PERSON MOVEMENT in 11 MINUTES - Unity Tutorial" (Dave/GameDevelopment)
+1. Player uses "Rigidbody".
+2. Makeshift player that can use both First-person and Third-person Prespective. (O)
+3. Player uses "Cinemachine" for Third-Prespective Camera.
+4. Cinemachine with preset settings for different type of Camera-Style from "Basic", "Combat" & "Topdown".
+
+ThirdPersonCam Script:
+- Cam can find where "Forward" is from the positon facing of the Player.
+
+- Script can change camera style for different gaming option.
