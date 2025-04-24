@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Dissolve#1_MAT
-  m_Shader: {fileID: -6465566751694194690, guid: c554c8700e6cb7f4fba6f8d6df03c652, type: 3}
+  m_Name: Dissolve#2_MAT
+  m_Shader: {fileID: -6465566751694194690, guid: 90158259f22fc2e4ba9ceaff1f0f4c77, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -37,15 +37,17 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Dissolve: 0.5
-    - _Edge_Width: 0.01
+    - _Cutoff_Height: 0
+    - _Edge_Width: 0.05
     - _Noise_Scale: 30
+    - _Noise_Strength: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
-    - _Edge_Color: {r: 0, g: 2.46697, b: 3.421384, a: 0}
+    - _Albedo: {r: 1, g: 0, b: 0, a: 0}
+    - _Edge_Color: {r: 4, g: 2.288444, b: 0, a: 0}
   m_BuildTextureStacks: []
---- !u!114 &4209921647530362990
+--- !u!114 &7053602055344681953
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
