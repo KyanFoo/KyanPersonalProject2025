@@ -63,6 +63,18 @@
     "m_CategoryData": [
         {
             "m_Id": "23f4d12a5b16426981148aa54f55102b"
+        },
+        {
+            "m_Id": "4365e349441a460e9fe2e2d6774a4c38"
+        },
+        {
+            "m_Id": "429d36b945bf4e058e9591dcfede0b70"
+        },
+        {
+            "m_Id": "af56b008a7e14846bc03d213d18b56b3"
+        },
+        {
+            "m_Id": "a412d05e18094f1d947c13ddbc4f73db"
         }
     ],
     "m_Nodes": [
@@ -1943,62 +1955,7 @@
     "m_Type": "UnityEditor.ShaderGraph.CategoryData",
     "m_ObjectId": "23f4d12a5b16426981148aa54f55102b",
     "m_Name": "",
-    "m_ChildObjectList": [
-        {
-            "m_Id": "41a83d9859844fdab4654940dcd9d1c6"
-        },
-        {
-            "m_Id": "c196a8d98fce4d8eb4309637be218b64"
-        },
-        {
-            "m_Id": "3710ef0dd5c94841a22aaf07147ca730"
-        },
-        {
-            "m_Id": "1c5aea46b57d4ad2ae617e3549858e2d"
-        },
-        {
-            "m_Id": "7e25a8e992f84262942751dea86a1f31"
-        },
-        {
-            "m_Id": "15a894e3ee2341d8b86e252d1e4bfd8c"
-        },
-        {
-            "m_Id": "59b08f9c2dfb4c948bce8571da0c6ee1"
-        },
-        {
-            "m_Id": "78c327e5344c42a8bc7a7b62760016ea"
-        },
-        {
-            "m_Id": "287f312119c144a3a41de8bef05ed8b6"
-        },
-        {
-            "m_Id": "c7ffb76a50504e5bafd427e6f6473f84"
-        },
-        {
-            "m_Id": "ef794d33016f417788b77e175333c3ab"
-        },
-        {
-            "m_Id": "fe8650eef0fc4170a74b16fded037943"
-        },
-        {
-            "m_Id": "36fe0bf07159481cb86d376b6255d21c"
-        },
-        {
-            "m_Id": "79653d7896e54a1597d39bab88073d74"
-        },
-        {
-            "m_Id": "455cca0196974bc6b0134a9f4898bd38"
-        },
-        {
-            "m_Id": "b90e53b5b7ac4037b9b812c9bb338346"
-        },
-        {
-            "m_Id": "deb8146dc84247b8a689a948c749a14e"
-        },
-        {
-            "m_Id": "12ae7023fc4340dd92ee261763f40ddf"
-        }
-    ]
+    "m_ChildObjectList": []
 }
 
 {
@@ -2731,6 +2688,60 @@
     "useTilingAndOffset": false,
     "m_Modifiable": true,
     "m_DefaultType": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "429d36b945bf4e058e9591dcfede0b70",
+    "m_Name": "Noise Textures",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "15a894e3ee2341d8b86e252d1e4bfd8c"
+        },
+        {
+            "m_Id": "78c327e5344c42a8bc7a7b62760016ea"
+        },
+        {
+            "m_Id": "59b08f9c2dfb4c948bce8571da0c6ee1"
+        },
+        {
+            "m_Id": "287f312119c144a3a41de8bef05ed8b6"
+        },
+        {
+            "m_Id": "c7ffb76a50504e5bafd427e6f6473f84"
+        },
+        {
+            "m_Id": "ef794d33016f417788b77e175333c3ab"
+        },
+        {
+            "m_Id": "fe8650eef0fc4170a74b16fded037943"
+        }
+    ]
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "4365e349441a460e9fe2e2d6774a4c38",
+    "m_Name": "Texture",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "41a83d9859844fdab4654940dcd9d1c6"
+        },
+        {
+            "m_Id": "c196a8d98fce4d8eb4309637be218b64"
+        },
+        {
+            "m_Id": "3710ef0dd5c94841a22aaf07147ca730"
+        },
+        {
+            "m_Id": "1c5aea46b57d4ad2ae617e3549858e2d"
+        },
+        {
+            "m_Id": "7e25a8e992f84262942751dea86a1f31"
+        }
+    ]
 }
 
 {
@@ -4787,6 +4798,21 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "a412d05e18094f1d947c13ddbc4f73db",
+    "m_Name": "Adjustments",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "deb8146dc84247b8a689a948c749a14e"
+        },
+        {
+            "m_Id": "12ae7023fc4340dd92ee261763f40ddf"
+        }
+    ]
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "a7213be2b84b49bfb0d58f5bfb8470e3",
     "m_Id": 0,
@@ -4893,6 +4919,27 @@
         "y": 0.0
     },
     "m_Labels": []
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "af56b008a7e14846bc03d213d18b56b3",
+    "m_Name": "Noise Controls",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "36fe0bf07159481cb86d376b6255d21c"
+        },
+        {
+            "m_Id": "79653d7896e54a1597d39bab88073d74"
+        },
+        {
+            "m_Id": "455cca0196974bc6b0134a9f4898bd38"
+        },
+        {
+            "m_Id": "b90e53b5b7ac4037b9b812c9bb338346"
+        }
+    ]
 }
 
 {
