@@ -1736,7 +1736,7 @@
     "m_ObjectId": "0fcc3ed5d4784d38a782c991713319e1",
     "m_Title": "Edge Color",
     "m_Position": {
-        "x": -2285.999755859375,
+        "x": -2286.0,
         "y": 1091.333251953125
     }
 }
@@ -2397,7 +2397,7 @@
     "m_ObjectId": "2056ce10f9d44950bbdb2ba6e3dde805",
     "m_Title": "Threshold",
     "m_Position": {
-        "x": -4120.66650390625,
+        "x": -4120.6669921875,
         "y": 1600.0
     }
 }
@@ -2580,7 +2580,7 @@
     "m_ObjectId": "27ffa82d5091422786f93f5a5729a186",
     "m_Title": "Bool TextureOn",
     "m_Position": {
-        "x": -3718.66650390625,
+        "x": -3718.666748046875,
         "y": 645.9999389648438
     }
 }
@@ -3210,22 +3210,16 @@
             "m_Id": "15a894e3ee2341d8b86e252d1e4bfd8c"
         },
         {
-            "m_Id": "78c327e5344c42a8bc7a7b62760016ea"
+            "m_Id": "59b08f9c2dfb4c948bce8571da0c6ee1"
         },
         {
-            "m_Id": "59b08f9c2dfb4c948bce8571da0c6ee1"
+            "m_Id": "78c327e5344c42a8bc7a7b62760016ea"
         },
         {
             "m_Id": "287f312119c144a3a41de8bef05ed8b6"
         },
         {
-            "m_Id": "c7ffb76a50504e5bafd427e6f6473f84"
-        },
-        {
             "m_Id": "ef794d33016f417788b77e175333c3ab"
-        },
-        {
-            "m_Id": "fe8650eef0fc4170a74b16fded037943"
         }
     ]
 }
@@ -4448,7 +4442,7 @@
     "m_ObjectId": "66dfd26fc3f0438496306fcfbc925fa5",
     "m_Title": "Normal Texture",
     "m_Position": {
-        "x": -1264.666748046875,
+        "x": -1264.6669921875,
         "y": -660.0000610351563
     }
 }
@@ -4556,7 +4550,7 @@
     "m_ObjectId": "6c015e6e566f4c8d8c0e20470d2a3847",
     "m_Title": "World-space Cutoff",
     "m_Position": {
-        "x": -3291.333251953125,
+        "x": -3291.33349609375,
         "y": 40.6666259765625
     }
 }
@@ -5316,7 +5310,7 @@
     "m_ObjectId": "86293509b4614e2abb6d3c7ccf427cca",
     "m_Title": "Emission Texture",
     "m_Position": {
-        "x": -1282.0,
+        "x": -1282.000244140625,
         "y": 77.33331298828125
     }
 }
@@ -5327,7 +5321,7 @@
     "m_ObjectId": "881b9e02c2554b08a36da2c0915443b1",
     "m_Title": "Metallic Texture",
     "m_Position": {
-        "x": -1248.666748046875,
+        "x": -1248.6669921875,
         "y": -272.66668701171877
     }
 }
@@ -6141,6 +6135,12 @@
     "m_ObjectId": "af56b008a7e14846bc03d213d18b56b3",
     "m_Name": "Noise Controls",
     "m_ChildObjectList": [
+        {
+            "m_Id": "c7ffb76a50504e5bafd427e6f6473f84"
+        },
+        {
+            "m_Id": "fe8650eef0fc4170a74b16fded037943"
+        },
         {
             "m_Id": "36fe0bf07159481cb86d376b6255d21c"
         },
@@ -6967,7 +6967,7 @@
     "m_ObjectId": "d65985bfc39340b2bc1cd41792d3781a",
     "m_Title": "Albedo Texture",
     "m_Position": {
-        "x": -1375.333251953125,
+        "x": -1375.33349609375,
         "y": -1199.333251953125
     }
 }
@@ -7052,7 +7052,7 @@
     "m_ObjectId": "dc033aa7d41b441394084e3379a2ade9",
     "m_Title": "Simple Noise",
     "m_Position": {
-        "x": -5332.0,
+        "x": -5332.00048828125,
         "y": 1126.0
     }
 }
