@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem.XR;
 
 public class PlayerController : MonoBehaviour
 {
@@ -28,6 +29,18 @@ public class PlayerController : MonoBehaviour
 
     public float currentSpeedMultiplier;
     public float currentSpeed;
+
+    [Header("Slope Handling")]
+    [SerializeField] private float maxSlopeAngle;
+    RaycastHit slopeHit;
+    [SerializeField] private bool exitingSlope;
+
+    [Header("Jump Setting")]
+    [SerializeField] private float jumpHeight = 2f;
+    [SerializeField] private float jumpCooldown = 0.25f;
+    [SerializeField] private float airMultiplier = 0.4f;
+    [SerializeField] private bool readyToJump = true;
+    public float verticalVelocity;
 
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space;
@@ -104,8 +117,27 @@ public class PlayerController : MonoBehaviour
         currentSpeed = Mathf.Lerp(currentSpeed, moveSpeed * currentSpeedMultiplier, sprintTransitSpeed * Time.deltaTime);
         move *= currentSpeed;
 
+        move.y = VerticalForceCalculation();
+
         // Apply force to Rigidbody
         rb.AddForce(move * moveSpeed * 5f, ForceMode.Force);
+    }
+    private float VerticalForceCalculation()
+    {
+        if (Input.GetKey(jumpKey) && grounded)
+        {
+            // Reset Y velocity to ensure consistent jump behavior
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+            float Gravity = -(targetGravity);
+
+            // Calculate required velocity to reach desired jump height
+            float jumpVelocity = Mathf.Sqrt(2f * Gravity * jumpHeight);
+
+            // Apply upward impulse force
+            rb.AddForce(Vector3.up * jumpVelocity, ForceMode.Impulse);
+        }
+        return verticalVelocity;
     }
     public void StateHandler()
     {
