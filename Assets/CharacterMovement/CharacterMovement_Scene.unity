@@ -1476,9 +1476,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   virtualCamera: {fileID: 2109108904}
-  player: {fileID: 0}
+  player: {fileID: 992080765}
+  rb: {fileID: 0}
   sensX: 400
   sensY: 400
+  moveSpeed: 5
+  sprintSpeedMultiplier: 2
+  sprintTransitSpeed: 5
+  groundDrag: 5
+  currentSpeedMultiplier: 0
+  currentSpeed: 0
+  jumpKey: 32
+  sprintKey: 304
+  playerHeight: 2
+  whatIsGround:
+    serializedVersion: 2
+    m_Bits: 8
+  grounded: 0
 --- !u!54 &992080767
 Rigidbody:
   m_ObjectHideFlags: 0
