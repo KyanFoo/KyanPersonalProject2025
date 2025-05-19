@@ -87,6 +87,7 @@ public class PlayerController2 : MonoBehaviour
         rb.AddForce(Vector3.up * extraGravity, ForceMode.Acceleration);
 
         MovePlayer();
+        Debug.Log(rb.velocity);
     }
 
     private void MyInput()
@@ -209,7 +210,6 @@ public class PlayerController2 : MonoBehaviour
     }
     private bool OnSlope()
     {
-        Debug.Log("On Slope");
         // Slope Check/
         if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
         {

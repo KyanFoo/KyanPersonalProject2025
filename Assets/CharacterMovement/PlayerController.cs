@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.XR;
 
 public class PlayerController : MonoBehaviour
@@ -29,6 +30,8 @@ public class PlayerController : MonoBehaviour
 
     public float currentSpeedMultiplier;
     public float currentSpeed;
+
+    Vector3 move;
 
     [Header("Slope Handling")]
     [SerializeField] private float maxSlopeAngle;
@@ -107,7 +110,7 @@ public class PlayerController : MonoBehaviour
         verticalInput = Input.GetAxisRaw("Vertical");
 
         // Movement direction relative to camera
-        Vector3 move = new Vector3(horizontalInput, 0, verticalInput);
+        move = new Vector3(horizontalInput, 0, verticalInput);
         move = virtualCamera.transform.TransformDirection(move);
 
         // Change state of Player.
@@ -117,10 +120,50 @@ public class PlayerController : MonoBehaviour
         currentSpeed = Mathf.Lerp(currentSpeed, moveSpeed * currentSpeedMultiplier, sprintTransitSpeed * Time.deltaTime);
         move *= currentSpeed;
 
-        move.y = VerticalForceCalculation();
-
+        ////////////
+        //move.y = VerticalForceCalculation();
         // Apply force to Rigidbody
-        rb.AddForce(move * moveSpeed * 5f, ForceMode.Force);
+        //rb.AddForce(move * moveSpeed * 5f, ForceMode.Force);
+        ////////////////
+
+        // On Slope
+        if (OnSlope())
+        {
+            //Check if Player is on slope.
+
+            // Apply slope movement only, moving diagonally, not horizontally.
+            rb.AddForce(GetSlopeMoveDirection() * currentSpeed * 20f, ForceMode.Force);
+
+            // Stick to the slope if moving upward
+            if (rb.velocity.y > 0)
+            {
+                rb.AddForce(Vector3.down * 80f, ForceMode.Force);
+            }
+
+            rb.useGravity = false;
+        }
+        // On Ground
+        if (grounded && !OnSlope())
+        {
+            //Check if Player is on ground and on slope.
+
+
+            move.y = VerticalForceCalculation();
+            // Apply flat ground movement only
+            rb.AddForce(move * currentSpeed * 10f, ForceMode.Force);
+
+            rb.useGravity = true;
+        }
+        // In Air.
+        else if (!grounded)
+        {
+            //Check if Player is in air.
+
+            // Add force to the player.
+            rb.AddForce(move.normalized * currentSpeed * 10f * airMultiplier, ForceMode.Force);
+
+            rb.useGravity = true;
+        }
     }
     private float VerticalForceCalculation()
     {
@@ -180,5 +223,19 @@ public class PlayerController : MonoBehaviour
 
         //Rotating the Player.
         player.rotation = Quaternion.Euler(0, yRotation, 0);
+    }
+    private bool OnSlope()
+    {
+        // Slope Check/
+        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
+        {
+            float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            return angle < maxSlopeAngle && angle != 0;
+        }
+        return false;
+    }
+    private Vector3 GetSlopeMoveDirection()
+    {
+        return Vector3.ProjectOnPlane(move, slopeHit.normal).normalized;
     }
 }

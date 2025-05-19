@@ -1478,14 +1478,23 @@ MonoBehaviour:
   virtualCamera: {fileID: 2109108904}
   player: {fileID: 992080765}
   rb: {fileID: 0}
+  state: 0
   sensX: 400
   sensY: 400
   moveSpeed: 5
   sprintSpeedMultiplier: 2
   sprintTransitSpeed: 5
   groundDrag: 5
+  targetGravity: -30
   currentSpeedMultiplier: 0
   currentSpeed: 0
+  maxSlopeAngle: 30
+  exitingSlope: 0
+  jumpHeight: 2
+  jumpCooldown: 0.25
+  airMultiplier: 0.4
+  readyToJump: 1
+  verticalVelocity: 0
   jumpKey: 32
   sprintKey: 304
   playerHeight: 2
@@ -2955,7 +2964,7 @@ Transform:
   m_GameObject: {fileID: 1917160382}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: -17.6, y: 1, z: 28.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
