@@ -2,12 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Reference")]
     [SerializeField] private CinemachineVirtualCamera virtualCamera;
+    [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform player;
 
     [Header("Camera Movement Setting")] 
@@ -17,24 +19,108 @@ public class PlayerController : MonoBehaviour
     float xRotation; // Tracks vertical camera rotation (up/down).
     float yRotation; // Tracks horizontal camera rotation (left/right).
 
+    [Header("Movement Setting")]
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float groundDrag = 5f; //Lower = Less Friction, Higher = More Friction.
+    //[SerializeField] private float sprintTransitSpeed = 5f;
+    float horizontalInput;
+    float verticalInput;
+
+    Vector3 move;
+
+    public float currentSpeed;
+
+    [Header("Ground Check")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float playerHeight;
+    [SerializeField] private LayerMask whatIsGround;
+    [SerializeField] private bool isGrounded;
+
+    [Header("Variable Check")]
+    public Vector3 velocity;
+    public float speed;
+
     // Start is called before the first frame update
     void Start()
     {
         // Lock the cursor to the center of the screen and hide it.
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        // Assign Rigidbody & Freeze Rotation.
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Ground Check/
+        isGrounded = Physics.CheckSphere(groundCheck.position, playerHeight * 0.5f + 0.2f, whatIsGround);
+        ///////// Old Method (Raycast)
+        //grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
+        /////////
+
+        // Handle Drag (Have some friction so that the character is not moving too fast).
+        if (isGrounded)
+        {
+            rb.drag = groundDrag;
+        }
+        else
+        {
+            rb.drag = 0f;
+        }
+
         Movement();
+        SpeedControl();
+
+        velocity = rb.velocity;
+        speed = rb.velocity.magnitude;
     }
 
     // Handles all movement-related logic (currently only camera movement).
     private void Movement()
     {
         CameraMovement();
+        GroundMovement();
+    }
+
+    private void GroundMovement()
+    {
+        // Get keyboard Input.
+        horizontalInput = Input.GetAxisRaw("Horizontal");
+        verticalInput = Input.GetAxisRaw("Vertical");
+
+        // Movement direction relative to camera
+        move = new Vector3(horizontalInput, 0, verticalInput);
+        move = virtualCamera.transform.TransformDirection(move);
+        move = move = move.normalized;
+
+        move.y = 0f;
+        // Add force to the player.
+        rb.AddForce(move * moveSpeed * 10f, ForceMode.Force);
+
+        ///////// Speed Transition Method
+        // Smooth transition between walk and sprint speed
+        //currentSpeed = Mathf.Lerp(currentSpeed, moveSpeed, sprintTransitSpeed * Time.deltaTime);
+        //move *= currentSpeed;
+        //rb.AddForce(move * currentSpeed * 10f, ForceMode.Force);
+        /////////
+    }
+
+    private void SpeedControl()
+    {
+        // gather the RigidBody's Velocity.
+        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+        // Limit Velocity if needed.
+        if (flatVel.magnitude > moveSpeed)
+        {
+            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+
+            // Corrected the RigidBody's Velocity to the moveSpeed.
+            rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
+        }
     }
 
     // Handles camera and player rotation based on mouse input.
