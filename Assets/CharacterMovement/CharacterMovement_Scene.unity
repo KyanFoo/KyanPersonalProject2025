@@ -1439,7 +1439,7 @@ GameObject:
   m_Component:
   - component: {fileID: 992080765}
   - component: {fileID: 992080767}
-  - component: {fileID: 992080766}
+  - component: {fileID: 992080768}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1463,45 +1463,6 @@ Transform:
   - {fileID: 1701288982}
   m_Father: {fileID: 1917160383}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &992080766
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 992080764}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bcb919873ea52a7469d1723c931f01ad, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  virtualCamera: {fileID: 2109108904}
-  player: {fileID: 992080765}
-  rb: {fileID: 0}
-  state: 0
-  sensX: 400
-  sensY: 400
-  moveSpeed: 5
-  sprintSpeedMultiplier: 2
-  sprintTransitSpeed: 5
-  groundDrag: 5
-  targetGravity: -30
-  currentSpeedMultiplier: 0
-  currentSpeed: 0
-  maxSlopeAngle: 30
-  exitingSlope: 0
-  jumpHeight: 2
-  jumpCooldown: 0.25
-  airMultiplier: 0.4
-  readyToJump: 1
-  verticalVelocity: 0
-  jumpKey: 32
-  sprintKey: 304
-  playerHeight: 2
-  whatIsGround:
-    serializedVersion: 2
-    m_Bits: 8
-  grounded: 0
 --- !u!54 &992080767
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1529,6 +1490,22 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!114 &992080768
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 992080764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 509e58405da41204780c29d894983173, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  virtualCamera: {fileID: 0}
+  player: {fileID: 992080765}
+  sensX: 400
+  sensY: 400
 --- !u!1 &1037354695
 GameObject:
   m_ObjectHideFlags: 0
