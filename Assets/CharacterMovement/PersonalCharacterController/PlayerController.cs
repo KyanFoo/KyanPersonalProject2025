@@ -4,6 +4,7 @@ using Cinemachine;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using static PlayerController2;
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,15 +21,22 @@ public class PlayerController : MonoBehaviour
     float yRotation; // Tracks horizontal camera rotation (left/right).
 
     [Header("Movement Setting")]
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float walkSpeed;
+    [SerializeField] private float sprintSpeed;
     [SerializeField] private float groundDrag = 5f; //Lower = Less Friction, Higher = More Friction.
-    //[SerializeField] private float sprintTransitSpeed = 5f;
+    float moveSpeed;
     float horizontalInput;
     float verticalInput;
 
     Vector3 move;
 
     public float currentSpeed;
+
+    public MovementState state;
+
+    [Header("Keybinds")]
+    public KeyCode jumpKey = KeyCode.Space;
+    public KeyCode sprintKey = KeyCode.LeftShift;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
@@ -39,6 +47,12 @@ public class PlayerController : MonoBehaviour
     [Header("Variable Check")]
     public Vector3 velocity;
     public float speed;
+    public enum MovementState
+    {
+        walking,
+        sprinting,
+        air
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -73,6 +87,7 @@ public class PlayerController : MonoBehaviour
 
         Movement();
         SpeedControl();
+        StateHandler();
 
         velocity = rb.velocity;
         speed = rb.velocity.magnitude;
@@ -99,13 +114,29 @@ public class PlayerController : MonoBehaviour
         move.y = 0f;
         // Add force to the player.
         rb.AddForce(move * moveSpeed * 10f, ForceMode.Force);
+    }
 
-        ///////// Speed Transition Method
-        // Smooth transition between walk and sprint speed
-        //currentSpeed = Mathf.Lerp(currentSpeed, moveSpeed, sprintTransitSpeed * Time.deltaTime);
-        //move *= currentSpeed;
-        //rb.AddForce(move * currentSpeed * 10f, ForceMode.Force);
-        /////////
+    public void StateHandler()
+    {
+        // Mode - Sprinting
+        if (isGrounded && Input.GetKey(sprintKey))
+        {
+            state = MovementState.sprinting;
+            moveSpeed = sprintSpeed;
+        }
+
+        // Mode - Walking
+        else if (isGrounded)
+        {
+            state = MovementState.walking;
+            moveSpeed = walkSpeed;
+        }
+
+        // Mode - Air
+        else
+        {
+            state = MovementState.air;
+        }
     }
 
     private void SpeedControl()
