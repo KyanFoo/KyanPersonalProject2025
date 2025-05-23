@@ -1508,14 +1508,21 @@ MonoBehaviour:
   player: {fileID: 992080765}
   sensX: 400
   sensY: 400
-  moveSpeed: 5
+  walkSpeed: 5
+  sprintSpeed: 10
   groundDrag: 5
+  currentSpeed: 0
+  state: 0
+  gravity: 30
+  jumpHeight: 2
+  jumpKey: 32
+  sprintKey: 304
   groundCheck: {fileID: 1767875907}
   playerHeight: 2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
-  grounded: 0
+  isGrounded: 0
   velocity: {x: 0, y: 0, z: 0}
   speed: 0
 --- !u!1 &1037354695

@@ -34,6 +34,11 @@ public class PlayerController : MonoBehaviour
 
     public MovementState state;
 
+    [Header("Jump Setting")]
+    [SerializeField] private float gravity = 30f;
+    [SerializeField] private float jumpHeight = 2f;
+    float verticalVelocity;
+
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space;
     public KeyCode sprintKey = KeyCode.LeftShift;
@@ -92,12 +97,17 @@ public class PlayerController : MonoBehaviour
         velocity = rb.velocity;
         speed = rb.velocity.magnitude;
     }
+    private void FixedUpdate()
+    {
+        // Calculate extra gravity needed
+        rb.AddForce(Vector3.down * gravity, ForceMode.Acceleration);
 
+        GroundMovement();
+    }
     // Handles all movement-related logic (currently only camera movement).
     private void Movement()
     {
         CameraMovement();
-        GroundMovement();
     }
 
     private void GroundMovement()
@@ -111,7 +121,8 @@ public class PlayerController : MonoBehaviour
         move = virtualCamera.transform.TransformDirection(move);
         move = move = move.normalized;
 
-        move.y = 0f;
+        move.y = VerticalForceCalculation();
+
         // Add force to the player.
         rb.AddForce(move * moveSpeed * 10f, ForceMode.Force);
     }
@@ -153,6 +164,24 @@ public class PlayerController : MonoBehaviour
             rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
         }
     }
+    private float VerticalForceCalculation()
+    {
+        if (Input.GetKey(jumpKey) && isGrounded)
+        {
+            // Reset Y velocity to ensure consistent jump behavior
+            rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+            float Gravity = -(gravity);
+
+            // Calculate required velocity to reach desired jump height
+            float jumpVelocity = Mathf.Sqrt(2 * jumpHeight * Mathf.Abs(Gravity));
+
+            // Apply upward impulse force
+            rb.AddForce(Vector3.up * jumpVelocity, ForceMode.Impulse);
+        }
+        return verticalVelocity;
+    }
+
 
     // Handles camera and player rotation based on mouse input.
     private void CameraMovement()
