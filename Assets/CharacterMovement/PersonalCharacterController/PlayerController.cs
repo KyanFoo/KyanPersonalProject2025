@@ -39,6 +39,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpHeight = 2f;
     float verticalVelocity;
 
+    public float airMultiplier;
+
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space;
     public KeyCode sprintKey = KeyCode.LeftShift;
@@ -48,6 +50,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float playerHeight;
     [SerializeField] private LayerMask whatIsGround;
     [SerializeField] private bool isGrounded;
+
+    [Header("Slope Handling")]
+    public float maxSlopeAngle;
+    private RaycastHit slopeHit;
+    private bool exitingSlope;
+    Vector3 slopeMoveDirection;
 
     [Header("Variable Check")]
     public Vector3 velocity;
@@ -75,7 +83,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         // Ground Check/
-        isGrounded = Physics.CheckSphere(groundCheck.position, playerHeight * 0.5f + 0.2f, whatIsGround);
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
         ///////// Old Method (Raycast)
         //grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
         /////////
@@ -94,6 +102,7 @@ public class PlayerController : MonoBehaviour
         SpeedControl();
         StateHandler();
 
+        slopeMoveDirection = Vector3.ProjectOnPlane(move, slopeHit.normal).normalized;
         velocity = rb.velocity;
         speed = rb.velocity.magnitude;
     }
@@ -125,6 +134,19 @@ public class PlayerController : MonoBehaviour
 
         // Add force to the player.
         rb.AddForce(move * moveSpeed * 10f, ForceMode.Force);
+
+        if (isGrounded)
+        {
+            rb.AddForce(move.normalized * moveSpeed * 10f, ForceMode.Acceleration);
+        }
+        else if (isGrounded && OnSlope())
+        {
+            rb.AddForce(slopeMoveDirection.normalized * moveSpeed * 10f, ForceMode.Acceleration);
+        }
+        else if (!isGrounded)
+        {
+            rb.AddForce(move.normalized * moveSpeed * 10f * airMultiplier, ForceMode.Acceleration);
+        }
     }
 
     public void StateHandler()
@@ -202,5 +224,15 @@ public class PlayerController : MonoBehaviour
 
         // Rotate the player to the direction the virtual camera is facing.
         player.rotation = Quaternion.Euler(0, yRotation, 0);
+    }
+    private bool OnSlope()
+    {
+        // Slope Check/
+        if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
+        {
+            float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            return angle < maxSlopeAngle && angle != 0;
+        }
+        return false;
     }
 }
