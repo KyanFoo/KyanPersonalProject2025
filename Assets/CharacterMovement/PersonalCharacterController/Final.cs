@@ -16,9 +16,11 @@ public class Final : MonoBehaviour
     [SerializeField] private float sensX; // Mouse sensitivity on X-axis (horizontal).
     [SerializeField] private float sensY; // Mouse sensitivity on Y-axis (vertical).
 
+    // Input values
     float horizontalInput;
     float verticalInput;
-    Vector3 moveDirection;
+
+    Vector3 moveDirection; // Final direction player will move in
 
     float mouseX;
     float mouseY;
@@ -26,31 +28,31 @@ public class Final : MonoBehaviour
     float yRotation; // Tracks horizontal camera rotation (left/right).
 
     [Header("Movement Setting")]
-    [SerializeField] private float walkSpeed;
-    [SerializeField] private float sprintSpeed;
+    [SerializeField] private float walkSpeed; // Speed while walking.
+    [SerializeField] private float sprintSpeed; // Speed while sprinting.
     [SerializeField] private float movementMultiplier = 10f;
     [SerializeField] private float airMultiplier = 0.4f;
-    float moveSpeed;
+    float moveSpeed; // Current move speed based on state
 
     [Header("Drag Setting")]
-    [SerializeField] private float groundDrag = 5f;
+    [SerializeField] private float groundDrag = 5f; // Friction when grounded
     [SerializeField] private float airDrag = 0.4f;
 
     [Header("Ground Check")]
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float playerHeight;
-    [SerializeField] private LayerMask whatIsGround;
-    [SerializeField] private bool isGrounded;
+    [SerializeField] private LayerMask whatIsGround; // Define ground layer
+    [SerializeField] private bool isGrounded; // Is the player currently grounded
 
     [Header("Jump Setting")]
-    [SerializeField] private float gravity = 30f;
-    [SerializeField] private float jumpForce;
-    [SerializeField] private float jumpCooldown;
-    [SerializeField] private bool readyToJump = true;
-    [SerializeField] private float gravityMultiplier = 1.5f;
+    [SerializeField] private float gravity = 30f; // Base gravity
+    [SerializeField] private float jumpForce; // Upward force on jump
+    [SerializeField] private float jumpCooldown; // Cooldown time before jumping again
+    [SerializeField] private bool readyToJump = true; // Can the player currently jump
+    [SerializeField] private float gravityMultiplier = 1.5f; // Extra gravity when falling
 
     [Header("Slope Handling")]
-    [SerializeField] private float maxSlopeAngle;
+    [SerializeField] private float maxSlopeAngle; // Maximum angle that is still considered walkable
     RaycastHit slopeHit;
     Vector3 slopeMoveDirection;
     bool exitingSlope;
@@ -81,14 +83,14 @@ public class Final : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Ground Check/
+        // Check if grounded using Raycast
         isGrounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * 0.5f + 0.2f, whatIsGround);
 
-        InputManagement();
-        Movement();
+        InputManagement(); // Handle input
+        Movement(); // Handle camera rotation
 
-        SpeedControl();
-        StateHandler();
+        SpeedControl(); // Limit movement speed
+        StateHandler(); // Handle sprint/walk/air state
 
         // Handle Drag (Have some friction so that the character is not moving too fast).
         if (isGrounded)
@@ -99,48 +101,54 @@ public class Final : MonoBehaviour
         {
             rb.drag = airDrag;
         }
+
+        // Calculate slope-adjusted movement direction
         slopeMoveDirection = Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
-
-
     }
+
     private void FixedUpdate()
     {
-        // Calculate extra gravity needed
+        // Apply base gravity
         rb.AddForce(Vector3.down * gravity, ForceMode.Acceleration);
 
-        GroundMovement();
+        GroundMovement(); // Handle player movement based on slope and state
 
+        // Apply extra gravity when falling
         if (!isGrounded && rb.velocity.y < 0)
         {
             float extraGravity = gravity * (gravityMultiplier - 1f);  // only add the extra portion
             rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
         }
     }
+
     private void Movement()
     {
-        CameraMovement();
+        CameraMovement(); // Handle camera rotation from mouse
     }
+
     private void GroundMovement()
     {
         // Movement direction relative to camera
         moveDirection = new Vector3(horizontalInput, 0, verticalInput);
-        //moveDirection = virtualCamera.transform.TransformDirection(moveDirection);
-        moveDirection = orientation.TransformDirection(moveDirection);
+        moveDirection = orientation.TransformDirection(moveDirection); // Align movement with camera orientation
 
         if (isGrounded && OnSlope())
         {
+            // Move up/down slope smoothly
             rb.AddForce(slopeMoveDirection.normalized * moveSpeed * 20f, ForceMode.Acceleration);
         }
         else if (isGrounded)
         {
+            // Regular ground movement
             rb.AddForce(moveDirection.normalized * moveSpeed * movementMultiplier, ForceMode.Acceleration);
         }
         else if (!isGrounded)
         {
-            // Add force to the player.
+            // Aerial movement
             rb.AddForce(moveDirection.normalized * moveSpeed * movementMultiplier * airMultiplier, ForceMode.Acceleration);
         }
     }
+
     public void StateHandler()
     {
         // Mode - Sprinting
@@ -168,24 +176,27 @@ public class Final : MonoBehaviour
     {
         exitingSlope = true;
 
-        // Reset Y Velocity.
+        // Reset Y Velocity to ensure consistent jump height.
         rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
 
+        // Apply upward force.
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
     }
+
     private void ResetJump()
     {
         readyToJump = true;
 
         exitingSlope = false;
     }
+
     private void CameraMovement()
     {
         //Adjust mouse Sensitivity.
         mouseX *= sensX * Time.deltaTime;
         mouseY *= sensY * Time.deltaTime;
 
-        // Update rotation values.
+        // Adjust rotation values.
         yRotation += mouseX;
         xRotation -= mouseY;
 
@@ -226,6 +237,7 @@ public class Final : MonoBehaviour
             }
         }
     }
+
     private void InputManagement()
     {
         // Gather inputs from the WASD keys for movement.
@@ -236,19 +248,19 @@ public class Final : MonoBehaviour
         mouseX = Input.GetAxisRaw("Mouse X");
         mouseY = Input.GetAxisRaw("Mouse Y");
 
-        // When to Jump.
+        // Jump input.
         if ((Input.GetKey(jumpKey) && readyToJump && isGrounded))
         {
             readyToJump = false;
 
             JumpMovement();
 
-            Invoke(nameof(ResetJump), jumpCooldown);
+            Invoke(nameof(ResetJump), jumpCooldown); // Reset jump after cooldown.
         }
     }
     private bool OnSlope()
     {
-        // Slope Check/
+        // Check for slope and compare angle to maxSlopeAngle
         if (Physics.Raycast(transform.position, Vector3.down, out slopeHit, playerHeight * 0.5f + 0.3f))
         {
             float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
