@@ -28,7 +28,7 @@ public class PlayerController2 : MonoBehaviour
     [Header("Slope Handling")]
     public float maxSlopeAngle;
     private RaycastHit slopeHit;
-    private bool exitingSlope;
+    public bool exitingSlope;
 
     public Transform orientation;
 
@@ -87,7 +87,6 @@ public class PlayerController2 : MonoBehaviour
         rb.AddForce(Vector3.up * extraGravity, ForceMode.Acceleration);
 
         MovePlayer();
-        Debug.Log(rb.velocity);
     }
 
     private void MyInput()
