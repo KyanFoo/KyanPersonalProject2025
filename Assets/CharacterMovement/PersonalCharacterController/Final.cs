@@ -47,6 +47,7 @@ public class Final : MonoBehaviour
     [SerializeField] private float jumpForce;
     [SerializeField] private float jumpCooldown;
     [SerializeField] private bool readyToJump = true;
+    [SerializeField] private float gravityMultiplier = 1.5f;
 
     [Header("Slope Handling")]
     [SerializeField] private float maxSlopeAngle;
@@ -108,6 +109,12 @@ public class Final : MonoBehaviour
         rb.AddForce(Vector3.down * gravity, ForceMode.Acceleration);
 
         GroundMovement();
+
+        if (!isGrounded && rb.velocity.y < 0)
+        {
+            float extraGravity = gravity * (gravityMultiplier - 1f);  // only add the extra portion
+            rb.AddForce(Vector3.down * extraGravity, ForceMode.Acceleration);
+        }
     }
     private void Movement()
     {
@@ -222,12 +229,12 @@ public class Final : MonoBehaviour
     private void InputManagement()
     {
         // Gather inputs from the WASD keys for movement.
-        verticalInput = Input.GetAxis("Vertical");
-        horizontalInput = Input.GetAxis("Horizontal");
+        verticalInput = Input.GetAxisRaw("Vertical");
+        horizontalInput = Input.GetAxisRaw("Horizontal");
 
         //Gather input from the mouse for camera movement.
-        mouseX = Input.GetAxis("Mouse X");
-        mouseY = Input.GetAxis("Mouse Y");
+        mouseX = Input.GetAxisRaw("Mouse X");
+        mouseY = Input.GetAxisRaw("Mouse Y");
 
         // When to Jump.
         if ((Input.GetKey(jumpKey) && readyToJump && isGrounded))

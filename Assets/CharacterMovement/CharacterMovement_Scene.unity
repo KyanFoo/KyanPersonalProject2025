@@ -914,6 +914,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   maxSlopeAngle: 45
+  exitingSlope: 0
   orientation: {fileID: 322420378}
   state: 0
 --- !u!1 &547254878
@@ -1545,10 +1546,13 @@ MonoBehaviour:
   rb: {fileID: 992080767}
   orientation: {fileID: 1275010635}
   player: {fileID: 992080765}
+  state: 0
   sensX: 400
   sensY: 400
-  walkSpeed: 5
+  walkSpeed: 7
   sprintSpeed: 10
+  movementMultiplier: 10
+  airMultiplier: 0.4
   groundDrag: 5
   airDrag: 5
   groundCheck: {fileID: 1767875907}
@@ -1561,6 +1565,8 @@ MonoBehaviour:
   jumpForce: 15
   jumpCooldown: 0.25
   readyToJump: 1
+  gravityMultiplier: 2.5
+  maxSlopeAngle: 45
   jumpKey: 32
   sprintKey: 304
 --- !u!1 &1037354695
