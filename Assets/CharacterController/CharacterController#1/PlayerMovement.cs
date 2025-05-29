@@ -183,6 +183,7 @@ namespace KyanPersonalProject2025.CharacterController1
                         Vector3 limitedVel = flatVel.normalized * moveSpeed;
                         rb.velocity = new Vector3(limitedVel.x, rb.velocity.y, limitedVel.z);
                     }
+                    velocityMagnitude = flatVel.magnitude;
                 }
             }
         }
