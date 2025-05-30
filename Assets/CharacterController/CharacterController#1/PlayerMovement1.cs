@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace KyanPersonalProject2025.CharacterController1
 {
-    public class PlayerMovement : MonoBehaviour
+    public class PlayerMovement1 : MonoBehaviour
     {
         public float velocityMagnitude;
 
