@@ -47,6 +47,7 @@ namespace KyanPersonalProject2025.CharacterController1
 
         public MovementState state;
 
+        float targetGravity = -30f;
         public enum MovementState
         {
             walking,
@@ -87,6 +88,10 @@ namespace KyanPersonalProject2025.CharacterController1
 
         private void FixedUpdate()
         {
+            // Calculate extra gravity needed
+            float extraGravity = targetGravity - Physics.gravity.y;
+            rb.AddForce(Vector3.up * extraGravity, ForceMode.Acceleration);
+
             MovePlayer();
         }
 
