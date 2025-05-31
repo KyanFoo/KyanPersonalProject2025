@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement2 : MonoBehaviour
+public class PlayerMovement2RB : MonoBehaviour
 {
     private Vector3 playerMovementInput;
     private Vector2 playerMouseInput;
