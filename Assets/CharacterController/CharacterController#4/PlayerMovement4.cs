@@ -13,7 +13,6 @@ public class PlayerMovement4 : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float sprintSpeedMultiplier = 2f;
     [SerializeField] private float sprintTransitSpeed = 5f;
-    [SerializeField] private float turningSpeed = 2f;
     // Mimic earth gravity.
     [SerializeField] private float gravity = 0f;
     [SerializeField] private float jumpHeight = 2f;
