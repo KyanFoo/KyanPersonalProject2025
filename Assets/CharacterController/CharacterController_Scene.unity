@@ -224,6 +224,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6026118}
   - component: {fileID: 6026120}
+  - component: {fileID: 6026121}
   - component: {fileID: 6026119}
   m_Layer: 0
   m_Name: Player
@@ -264,8 +265,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   virtualCamera: {fileID: 1564643238}
   playerBody: {fileID: 6026118}
+  playerRigidbody: {fileID: 6026120}
+  playerCollider: {fileID: 6026121}
   sensX: 140
   sensY: 140
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  groundCheckDistance: 0.05
+  isGrounded: 0
+  debug: 1
+  drawSphereSize: 0.28
 --- !u!54 &6026120
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -293,6 +303,29 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!136 &6026121
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6026117}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.5
+  m_Height: 2
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!43 &34640148
 Mesh:
   m_ObjectHideFlags: 0
@@ -1479,7 +1512,7 @@ MonoBehaviour:
   gravityMultiplier: 1
   extraGravity: 2
   extraGravityTimeAfterSlope: 0.2
-  debug: 0
+  debug: 1
 --- !u!54 &213020828
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -20650,7 +20683,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.5
   m_Height: 2
