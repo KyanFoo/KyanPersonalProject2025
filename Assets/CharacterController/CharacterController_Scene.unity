@@ -263,17 +263,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61efae33faaadf8418209e7c9fa6750b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minVelocity: 0.1
+  velocityMagnitude: 0
+  state: 0
   virtualCamera: {fileID: 1564643238}
   playerBody: {fileID: 6026118}
   playerRigidbody: {fileID: 6026120}
   playerCollider: {fileID: 6026121}
+  orientation: {fileID: 863198011}
   sensX: 140
   sensY: 140
+  walkSpeed: 7
+  sprintSpeed: 10
+  groundDrag: 5
+  airDrag: 2
   groundMask:
     serializedVersion: 2
     m_Bits: 64
   groundCheckDistance: 0.05
   isGrounded: 0
+  jumpKey: 32
+  sprintKey: 304
   debug: 1
   drawSphereSize: 0.28
 --- !u!54 &6026120
@@ -1032,9 +1042,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   orientation: {fileID: 788328246}
-  moveSpeed: 6
+  moveSpeed: 7
   airMultiplier: 0.4
-  walkSpeed: 4
+  walkSpeed: 5
   sprintSpeed: 6
   acceleration: 10
   jumpForce: 5
