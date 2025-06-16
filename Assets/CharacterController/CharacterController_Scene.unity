@@ -275,6 +275,7 @@ MonoBehaviour:
   sensY: 140
   walkSpeed: 7
   sprintSpeed: 10
+  airControlMultiplier: 0.4
   groundDrag: 5
   airDrag: 2
   groundMask:
@@ -282,6 +283,8 @@ MonoBehaviour:
     m_Bits: 64
   groundCheckDistance: 0.05
   isGrounded: 0
+  jumpForce: 8
+  maxJumps: 2
   jumpKey: 32
   sprintKey: 304
   debug: 1

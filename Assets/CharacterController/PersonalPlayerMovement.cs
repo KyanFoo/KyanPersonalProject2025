@@ -40,6 +40,7 @@ public class PersonalPlayerMovement : MonoBehaviour
     float moveSpeed;
     [SerializeField] private float walkSpeed;
     [SerializeField] private float sprintSpeed;
+    [SerializeField] private float airControlMultiplier = 0.4f;
 
     [Header("Drag")]
     [SerializeField] float groundDrag = 6f;
@@ -50,6 +51,12 @@ public class PersonalPlayerMovement : MonoBehaviour
     [SerializeField] private float groundCheckDistance = 0.05f;
     [SerializeField] public bool isGrounded;
 
+    [Header("Jump Settings")]
+    [SerializeField] private float jumpForce = 8f;
+    [SerializeField] private int maxJumps = 1;
+
+    bool pressedJump;
+    int jumpsLeft;
 
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space;
@@ -58,6 +65,11 @@ public class PersonalPlayerMovement : MonoBehaviour
     [Header("DebugDraw Settings")]
     public bool debug;
     public float drawSphereSize;
+
+    private void Start()
+    {
+        jumpsLeft = maxJumps;
+    }
 
     public enum MovementState
     {
@@ -73,10 +85,30 @@ public class PersonalPlayerMovement : MonoBehaviour
         Statehandler();
 
         CameraMovement();
+
+        if (Input.GetKeyDown(jumpKey))
+        {
+            pressedJump = true;
+        }
     }
     private void FixedUpdate()
     {
         isGrounded = IsGrounded();
+
+        if (isGrounded)
+        {
+            jumpsLeft = maxJumps;
+        }
+
+        if (pressedJump)
+        {
+            pressedJump = false;
+
+            if (isGrounded || jumpsLeft > 0)
+            {
+                Jump();
+            }
+        }
 
         GroundMovement();
         ControlDrag();
@@ -104,14 +136,32 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     }
 
+    private void Jump()
+    {
+        Vector3 currentVelocity = playerRigidbody.velocity;
+        currentVelocity.y = 0;
+        playerRigidbody.velocity = currentVelocity;
+
+        playerRigidbody.AddForce(jumpForce * Vector3.up, ForceMode.VelocityChange);
+        if (!isGrounded)
+        {
+            jumpsLeft--;
+        }
+    }
+
     private void GroundMovement()
     {
         Vector3 dir = Vector3.zero;
         dir = orientation.forward * verticalInput + orientation.right * horizontalInput;
         finalDir = dir.normalized;
+
         if (isGrounded)
         {
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+        }
+        else if (!isGrounded)
+        {
+            playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
         }
     }
 
