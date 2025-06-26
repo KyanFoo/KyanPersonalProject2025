@@ -47,11 +47,10 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     [Header("Slope Handling Settings")]
     [SerializeField] private float maxSlopeAngle = 45f; // Max climbable slope angle
-    [SerializeField] private float slideForce = 25f; // Force applied when sliding on a slope
 
     public bool isOnSlope; // If player is on a slope
+    public float slopeAngle; // Angle of the slope
     private RaycastHit slopeHit; // Stores hit info on slope
-    private float slopeAngle; // Angle of the slope
 
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space; // Jump key
@@ -91,6 +90,7 @@ public class PersonalPlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         isGrounded = IsGrounded();
+        isOnSlope = OnSlope();
 
         // Reset jumps when grounded
         if (isGrounded)
@@ -144,11 +144,17 @@ public class PersonalPlayerMovement : MonoBehaviour
         finalDir = dir.normalized;
 
         // Apply force based on grounded or air
-        if (isGrounded)
+        if (isOnSlope && isGrounded)
+        {
+            playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
+            Debug.Log("Slope");
+        }
+        else if (isGrounded)
         {
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+            Debug.Log("Ground");
         }
-        else if (!isGrounded)
+        else
         {
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
         }
@@ -253,6 +259,26 @@ public class PersonalPlayerMovement : MonoBehaviour
         bool isGrounded = Physics.SphereCast(FeetPosition() + upOffset, playerCollider.radius * transform.localScale.x, -1 * transform.up, out RaycastHit info, groundCheckDistance + GROUND_CHECK_SPHERE_OFFSET, groundMask);
 
         return isGrounded;
+    }
+
+    private bool OnSlope()
+    {
+        Vector3 origin = FeetPosition();
+        float castDistance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+
+        if (Physics.Raycast(origin, Vector3.down, out slopeHit, castDistance))
+        {
+            slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            return slopeAngle > 0f && slopeAngle <= maxSlopeAngle;
+        }
+
+        slopeAngle = 0f;
+        return false;
+    }
+
+    private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
+    {
+        return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
     }
 
     public void OnDrawGizmosSelected()
