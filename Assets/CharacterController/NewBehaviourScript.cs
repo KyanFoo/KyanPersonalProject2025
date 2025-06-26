@@ -1,12 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
 
-public class PersonalPlayerMovement : MonoBehaviour
+public class NewBehaviourScript : MonoBehaviour
 {
     private const float GROUND_CHECK_SPHERE_OFFSET = 0.05f; // Offset for SphereCast
     public float minVelocity = 0.1f; // Velocity below which friction is applied
@@ -28,7 +25,7 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     private float moveSpeed; // Final current speed
 
-    [Header("Drag Settings")]
+    [Header("Drag")]
     [SerializeField] private float groundDrag = 6f; // Drag when grounded
     [SerializeField] private float airDrag = 2f; // Drag when in air
 
@@ -72,63 +69,53 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     private void Start()
     {
-        jumpsLeft = maxJumps; // Initialize jump count
+        jumpsLeft = maxJumps; // Reset jump counter
     }
 
     private void Update()
     {
-        InputManagement();
-        SpeedControl();
-        Statehandler();
-        CameraMovement();
+        InputManagement(); // Handle input gathering
+        SpeedControl(); // Handle speed limitation & friction
+        Statehandler(); // Handle state changes
+        CameraMovement(); // Update camera rotation
 
-        // Detect jump key pressed
         if (Input.GetKeyDown(jumpKey))
         {
-            pressedJump = true;
+            pressedJump = true; // Jump key buffer
         }
     }
+
     private void FixedUpdate()
     {
-        isGrounded = IsGrounded();
+        isGrounded = IsGrounded(); // Update ground check
+        isOnSlope = OnSlope(); // Update slope check
 
-        // Reset jumps when grounded
         if (isGrounded)
-        {
-            jumpsLeft = maxJumps;
-        }
+            jumpsLeft = maxJumps; // Reset jump count on ground
 
-        // Initiate Jump() Function
         if (pressedJump)
         {
             pressedJump = false;
-
-            // Check to see if [isGrounded] is true and [jumpLeft] is more than 0
             if (isGrounded || jumpsLeft > 0)
-            {
-                Jump();
-            }
+                Jump(); // Perform jump
         }
 
-        GroundMovement();
-        ControlDrag();
+        GroundMovement(); // Handle movement
+        ControlDrag(); // Update drag
     }
 
     private void Statehandler()
     {
-        // Mode - Sprinting
         if (isGrounded && Input.GetKey(sprintKey))
         {
             state = MovementState.sprinting;
             moveSpeed = sprintSpeed;
         }
-        // Mode - Walking
         else if (isGrounded)
         {
             state = MovementState.walking;
             moveSpeed = walkSpeed;
         }
-        // Mode - Air
         else
         {
             state = MovementState.air;
@@ -137,34 +124,33 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     private void GroundMovement()
     {
-        Vector3 dir = Vector3.zero;
+        Vector3 dir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        finalDir = dir.normalized; // Normalize direction
 
-        // Calculate direction from input
-        dir = orientation.forward * verticalInput + orientation.right * horizontalInput;
-        finalDir = dir.normalized;
-
-        // Apply force based on grounded or air
-        if (isGrounded)
+        if (isOnSlope && isGrounded)
+        {
+            playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
+            playerRigidbody.useGravity = false;
+        }
+        else if (isGrounded)
         {
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+            playerRigidbody.useGravity = true;
         }
-        else if (!isGrounded)
+        else
         {
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+            playerRigidbody.useGravity = true;
         }
     }
 
     private void Jump()
     {
-        // Reset vertical velocity to prevent stacking
         Vector3 currentVelocity = playerRigidbody.velocity;
         currentVelocity.y = 0;
         playerRigidbody.velocity = currentVelocity;
 
-        // Apply jump force
         playerRigidbody.AddForce(jumpForce * Vector3.up, ForceMode.VelocityChange);
-
-        // Apply multiple jump force in the air
         if (!isGrounded)
         {
             jumpsLeft--;
@@ -185,7 +171,6 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     private void SpeedControl()
     {
-        // Limit velocity to max moveSpeed
         Vector3 flatVel = new Vector3(playerRigidbody.velocity.x, 0f, playerRigidbody.velocity.z);
 
         if (flatVel.magnitude > moveSpeed)
@@ -196,7 +181,6 @@ public class PersonalPlayerMovement : MonoBehaviour
 
         velocityMagnitude = flatVel.magnitude; // optional: for debugging or UI
 
-        // Apply friction when idle on ground
         if (finalDir == Vector3.zero && isGrounded)
         {
             if (playerRigidbody.velocity.magnitude < minVelocity)
@@ -212,28 +196,33 @@ public class PersonalPlayerMovement : MonoBehaviour
         }
     }
 
-    private void CameraMovement()
+    private bool IsGrounded()
     {
-        //Adjust mouse Sensitivity.
-        mouseX *= sensX * Time.deltaTime;
-        mouseY *= sensY * Time.deltaTime;
+        Vector3 upOffset = transform.up * GROUND_CHECK_SPHERE_OFFSET;
+        bool isGrounded = Physics.SphereCast(FeetPosition() + upOffset, playerCollider.radius * transform.localScale.x, -1 * transform.up, out RaycastHit info, groundCheckDistance + GROUND_CHECK_SPHERE_OFFSET, groundMask);
 
-        yRotation += mouseX;
-        xRotation -= mouseY;
-
-        //Prevent overrotation.
-        xRotation = Mathf.Clamp(xRotation, -90, 90);
-
-        //Rotate the Camera.
-        virtualCamera.transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
-
-        //Rotate the Player.
-        playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
+        return isGrounded;
     }
+
+    private bool OnSlope()
+    {
+        float castDistance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+        if (Physics.Raycast(FeetPosition(), Vector3.down, out slopeHit, castDistance))
+        {
+            slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+            return slopeAngle > 0f && slopeAngle <= maxSlopeAngle;
+        }
+        slopeAngle = 0f;
+        return false;
+    }
+
+    private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
+    {
+        return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
+    }
+
     private Vector3 FeetPosition()
     {
-        // Function: Calculates bottom of capsule for ground check
-
         Vector3 sphereOffset = (playerCollider.height * transform.localScale.y / 2 - playerCollider.radius * transform.localScale.x) * -1 * transform.up;
         // (height / 2 - radius) gives you the distance from center to bottom of the flat capsule base, before the rounded part.
 
@@ -246,34 +235,22 @@ public class PersonalPlayerMovement : MonoBehaviour
         return feetPosition;
     }
 
-    private bool IsGrounded()
+    private void CameraMovement()
     {
-        // Raycast check for ground
-        Vector3 upOffset = transform.up * GROUND_CHECK_SPHERE_OFFSET;
-        bool isGrounded = Physics.SphereCast(FeetPosition() + upOffset, playerCollider.radius * transform.localScale.x, -1 * transform.up, out RaycastHit info, groundCheckDistance + GROUND_CHECK_SPHERE_OFFSET, groundMask);
+        //Adjust mouse Sensitivity.
+        mouseX *= sensX * Time.deltaTime;
+        mouseY *= sensY * Time.deltaTime;
 
-        return isGrounded;
-    }
+        yRotation += mouseX;
+        xRotation -= mouseY;
 
-    public void OnDrawGizmosSelected()
-    {
-        if (debug)
-        {
-            //[Debug Draw the Feet Positon of the Sphere in the PlayerObj.]
-            //Gizmos.color = Color.green;
-            //Vector3 sphereOffset = (playerCollider.height * transform.localScale.y / 2 - playerCollider.radius * transform.localScale.x) * -1 * transform.up;
-            //Vector3 feetPosition = playerRigidbody.position + sphereOffset;
+        //Prevent overrotation.
+        xRotation = Mathf.Clamp(xRotation, -90, 90);
 
-            //Gizmos.DrawSphere(feetPosition, drawSphereSize);
-            //Gizmos.DrawWireSphere(feetPosition, playerCollider.radius * transform.localScale.x);
+        virtualCamera.transform.localRotation = Quaternion.Euler(xRotation, yRotation, 0f);
 
-
-            //[Debug Draws of IsGrounded() Collidiers]
-            //Gizmos.color = Color.green;
-
-            //Vector3 feetOffset = -1 * transform.up * groundCheckDistance;
-            //Gizmos.DrawWireSphere(FeetPosition() + feetOffset, playerCollider.radius * transform.localScale.x);
-        }
+        //Rotating the Player.
+        playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
     }
 
     private void InputManagement()
