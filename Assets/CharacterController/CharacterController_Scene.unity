@@ -265,12 +265,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   minVelocity: 0.1
   velocityMagnitude: 0
-  state: 0
-  virtualCamera: {fileID: 1564643238}
-  playerBody: {fileID: 6026118}
-  playerRigidbody: {fileID: 6026120}
-  playerCollider: {fileID: 6026121}
-  orientation: {fileID: 863198011}
   sensX: 140
   sensY: 140
   walkSpeed: 7
@@ -278,15 +272,25 @@ MonoBehaviour:
   airControlMultiplier: 0.4
   groundDrag: 5
   airDrag: 2
+  jumpForce: 8
+  maxJumps: 2
   groundMask:
     serializedVersion: 2
     m_Bits: 64
   groundCheckDistance: 0.05
   isGrounded: 0
-  jumpForce: 8
-  maxJumps: 2
+  maxSlopeAngle: 45
+  isOnSlope: 0
+  isSlopeSteep: 0
+  slopeAngle: 0
   jumpKey: 32
   sprintKey: 304
+  virtualCamera: {fileID: 1564643238}
+  playerBody: {fileID: 6026118}
+  playerRigidbody: {fileID: 6026120}
+  playerCollider: {fileID: 6026121}
+  orientation: {fileID: 863198011}
+  state: 0
   debug: 1
   drawSphereSize: 0.28
 --- !u!54 &6026120

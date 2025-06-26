@@ -47,8 +47,9 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     [Header("Slope Handling Settings")]
     [SerializeField] private float maxSlopeAngle = 45f; // Max climbable slope angle
-
+    [SerializeField] private float slideForce = 5f;
     public bool isOnSlope; // If player is on a slope
+    public bool isSlopeSteep;
     public float slopeAngle; // Angle of the slope
     private RaycastHit slopeHit; // Stores hit info on slope
 
@@ -91,6 +92,7 @@ public class PersonalPlayerMovement : MonoBehaviour
     {
         isGrounded = IsGrounded();
         isOnSlope = OnSlope();
+        isSlopeSteep = IsTooSteep();
 
         // Reset jumps when grounded
         if (isGrounded)
@@ -144,7 +146,15 @@ public class PersonalPlayerMovement : MonoBehaviour
         finalDir = dir.normalized;
 
         // Apply force based on grounded or air
-        if (isOnSlope && isGrounded)
+        if (isGrounded && isSlopeSteep)
+        {
+            Vector3 slideDir = Vector3.ProjectOnPlane(Vector3.down, slopeHit.normal).normalized;
+
+            playerRigidbody.AddForce(slideDir * slideForce, ForceMode.Force);
+            playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+
+        }
+        else if (isGrounded && isOnSlope)
         {
             playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
             Debug.Log("Slope");
@@ -279,6 +289,11 @@ public class PersonalPlayerMovement : MonoBehaviour
     private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
     {
         return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
+    }
+
+    private bool IsTooSteep()
+    {
+        return slopeAngle > maxSlopeAngle;
     }
 
     public void OnDrawGizmosSelected()
