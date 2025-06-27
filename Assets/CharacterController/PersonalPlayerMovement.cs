@@ -52,6 +52,12 @@ public class PersonalPlayerMovement : MonoBehaviour
     public bool isSlopeSteep;
     public float slopeAngle; // Angle of the slope
     private RaycastHit slopeHit; // Stores hit info on slope
+    private float lastTimeOnSlope;
+
+    [Header("Gravity Control Settings")]
+    [SerializeField] private float gravityMultiplier = 1f;
+    [SerializeField] private float extraGravity = 2f;
+    [SerializeField] private float extraGravityTimeAfterSlope = 0.3f;
 
     [Header("Keybinds")]
     public KeyCode jumpKey = KeyCode.Space; // Jump key
@@ -94,11 +100,18 @@ public class PersonalPlayerMovement : MonoBehaviour
         isOnSlope = OnSlope();
         isSlopeSteep = IsTooSteep();
 
+        if (isGrounded && slopeAngle >= 0 && isOnSlope)
+        {
+            lastTimeOnSlope = Time.time;
+        }
+
         // Reset jumps when grounded
         if (isGrounded)
         {
             jumpsLeft = maxJumps;
         }
+
+        ExtraGravity();
 
         // Initiate Jump() Function
         if (pressedJump)
@@ -157,16 +170,27 @@ public class PersonalPlayerMovement : MonoBehaviour
         else if (isGrounded && isOnSlope)
         {
             playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
-            Debug.Log("Slope");
+            //Debug.Log("Slope");
         }
         else if (isGrounded)
         {
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
-            Debug.Log("Ground");
+            //Debug.Log("Ground");
         }
         else
         {
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+        }
+    }
+
+    private void ExtraGravity()
+    {
+        // Add extra gravity in general
+        playerRigidbody.AddForce(Physics.gravity * gravityMultiplier, ForceMode.Acceleration);
+
+        if (!pressedJump && !(isGrounded && isOnSlope) && Time.time < lastTimeOnSlope + extraGravityTimeAfterSlope)
+        {
+            playerRigidbody.AddForce(Physics.gravity * extraGravity, ForceMode.Acceleration);
         }
     }
 
