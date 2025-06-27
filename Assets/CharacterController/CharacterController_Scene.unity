@@ -225,7 +225,7 @@ GameObject:
   - component: {fileID: 6026118}
   - component: {fileID: 6026120}
   - component: {fileID: 6026121}
-  - component: {fileID: 6026119}
+  - component: {fileID: 6026122}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -251,48 +251,6 @@ Transform:
   - {fileID: 1674153056}
   m_Father: {fileID: 184304641}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6026119
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6026117}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 61efae33faaadf8418209e7c9fa6750b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  minVelocity: 0.1
-  velocityMagnitude: 0
-  sensX: 140
-  sensY: 140
-  walkSpeed: 7
-  sprintSpeed: 10
-  airControlMultiplier: 0.4
-  groundDrag: 5
-  airDrag: 2
-  jumpForce: 8
-  maxJumps: 2
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 64
-  groundCheckDistance: 0.05
-  isGrounded: 0
-  maxSlopeAngle: 45
-  isOnSlope: 0
-  isSlopeSteep: 0
-  slopeAngle: 0
-  jumpKey: 32
-  sprintKey: 304
-  virtualCamera: {fileID: 1564643238}
-  playerBody: {fileID: 6026118}
-  playerRigidbody: {fileID: 6026120}
-  playerCollider: {fileID: 6026121}
-  orientation: {fileID: 863198011}
-  state: 0
-  debug: 1
-  drawSphereSize: 0.28
 --- !u!54 &6026120
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -343,6 +301,52 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6026122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6026117}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61efae33faaadf8418209e7c9fa6750b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  virtualCamera: {fileID: 1564643238}
+  playerBody: {fileID: 6026118}
+  playerRigidbody: {fileID: 6026120}
+  playerCollider: {fileID: 6026121}
+  orientation: {fileID: 863198011}
+  sensX: 140
+  sensY: 140
+  walkSpeed: 7
+  sprintSpeed: 12
+  airControlMultiplier: 0.4
+  velocityMagnitude: 0
+  state: 0
+  groundDrag: 5
+  airDrag: 2
+  gravityMultiplier: 1.5
+  extraGravity: 2
+  extraGravityTimeAfterSlope: 0.3
+  jumpForce: 12
+  maxJumps: 2
+  pressedJump: 0
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  groundCheckDistance: 0.05
+  isGrounded: 0
+  maxSlopeAngle: 45
+  slideForce: 5
+  isOnSlope: 0
+  isSlopeSteep: 0
+  slopeAngle: 0
+  jumpKey: 32
+  sprintKey: 304
+  debug: 0
+  drawSphereSize: 0.1
 --- !u!43 &34640148
 Mesh:
   m_ObjectHideFlags: 0

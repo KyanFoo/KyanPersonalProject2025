@@ -1,81 +1,92 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UIElements;
 
 public class PersonalPlayerMovement : MonoBehaviour
 {
-    private const float GROUND_CHECK_SPHERE_OFFSET = 0.05f; // Offset for SphereCast
-    public float minVelocity = 0.1f; // Velocity below which friction is applied
-    public float velocityMagnitude; // Magnitude of horizontal velocity
-
-    [Header("Input Settings")]
-    [SerializeField] private float sensX; // Mouse sensitivity X axis
-    [SerializeField] private float sensY; // Mouse sensitivity Y axis
-
-    private float mouseX, mouseY; // Mouse movement
-    private float xRotation, yRotation; // Camera rotation
-    private float verticalInput, horizontalInput; // WASD input
-    private Vector3 finalDir; // Final calculated direction
-
-    [Header("Movement Settings")]
-    [SerializeField] private float walkSpeed; // Speed when walking
-    [SerializeField] private float sprintSpeed; // Speed when sprinting
-    [SerializeField] private float airControlMultiplier = 0.4f; // Air movement control multiplier
-
-    private float moveSpeed; // Final current speed
-
-    [Header("Drag Settings")]
-    [SerializeField] private float groundDrag = 6f; // Drag when grounded
-    [SerializeField] private float airDrag = 2f; // Drag when in air
-
-    [Header("Jump Settings")]
-    [SerializeField] private float jumpForce = 8f; // Jump strength
-    [SerializeField] private int maxJumps = 1; // Number of allowed jumps
-
-    private int jumpsLeft; // Jump counter
-    private bool pressedJump; // Buffer jump key press
-
-    [Header("GroundCheck Settings")]
-    [SerializeField] private LayerMask groundMask; // Layer to check as ground
-    [SerializeField] private float groundCheckDistance = 0.05f; // Distance for ground check
-
-    public bool isGrounded; // If player is touching ground
-
-    [Header("Slope Handling Settings")]
-    [SerializeField] private float maxSlopeAngle = 45f; // Max climbable slope angle
-    [SerializeField] private float slideForce = 5f;
-    public bool isOnSlope; // If player is on a slope
-    public bool isSlopeSteep;
-    public float slopeAngle; // Angle of the slope
-    private RaycastHit slopeHit; // Stores hit info on slope
-    private float lastTimeOnSlope;
-
-    [Header("Gravity Control Settings")]
-    [SerializeField] private float gravityMultiplier = 1f;
-    [SerializeField] private float extraGravity = 2f;
-    [SerializeField] private float extraGravityTimeAfterSlope = 0.3f;
-
-    [Header("Keybinds")]
-    public KeyCode jumpKey = KeyCode.Space; // Jump key
-    public KeyCode sprintKey = KeyCode.LeftShift; // Sprint key
+    // ────────────────────────────────────────────────
+    private const float GROUND_CHECK_SPHERE_OFFSET = 0.05f; // Small vertical offset to improve ground check accuracy
 
     [Header("Reference")]
-    [SerializeField] private CinemachineVirtualCamera virtualCamera; // Camera reference
-    [SerializeField] private Transform playerBody; // Player rotation transform
-    [SerializeField] private Rigidbody playerRigidbody; // Rigidbody
-    [SerializeField] private CapsuleCollider playerCollider; // Capsule collider
-    [SerializeField] private Transform orientation; // Transform for direction reference
-    public enum MovementState { walking, sprinting, air } // State machine for movement
-    [SerializeField] private MovementState state; // Current state
+    [SerializeField] private CinemachineVirtualCamera virtualCamera; // Main virtual camera for look control
+    [SerializeField] private Transform playerBody;                   // Reference for rotating the player's body
+    [SerializeField] private Rigidbody playerRigidbody;              // Rigidbody used for physics movement
+    [SerializeField] private CapsuleCollider playerCollider;         // Used for ground checks and character shape
+    [SerializeField] private Transform orientation;                  // Forward/right direction reference for input
 
+    // ────────────────────────────────────────────────
+    [Header("Input Settings")]
+    [SerializeField] private float sensX; // Mouse sensitivity for horizontal look
+    [SerializeField] private float sensY; // Mouse sensitivity for vertical look
+
+    private float verticalInput;          // Input from W/S or Up/Down
+    private float horizontalInput;        // Input from A/D or Left/Right
+    private float mouseX, mouseY;         // Mouse movement values
+    private float xRotation, yRotation;   // Rotation values for camera and body
+    private Vector3 finalDir;             // Final movement direction after processing
+
+    // ────────────────────────────────────────────────
+    [Header("Movement Settings")]
+    [SerializeField] private float walkSpeed = 7f;               // Speed while walking
+    [SerializeField] private float sprintSpeed = 10f;             // Speed while sprinting
+    [SerializeField] private float airControlMultiplier = 0.4f;  // Movement control reduction in air
+    [SerializeField] private float velocityMagnitude;            // Exposed: horizontal velocity magnitude (for UI/debug)
+
+    private float moveSpeed;              // Current applied move speed
+    private float minVelocity = 0.1f;     // Minimum threshold to apply velocity zeroing
+
+    public enum MovementState { walking, sprinting, air }  // Movement state enum
+    [SerializeField] private MovementState state;          // Current movement state
+
+    // ────────────────────────────────────────────────
+    [Header("Drag Settings")]
+    [SerializeField] private float groundDrag = 6f; // Drag when grounded
+    [SerializeField] private float airDrag = 2f;    // Drag when in the air
+
+    // ────────────────────────────────────────────────
+    [Header("Gravity Control Settings")]
+    [SerializeField] private float gravityMultiplier = 1f;             // Normal gravity multiplier
+    [SerializeField] private float extraGravity = 2f;                  // Extra downward force to fight floatiness
+    [SerializeField] private float extraGravityTimeAfterSlope = 0.3f;  // Grace period after leaving a slope
+
+    // ────────────────────────────────────────────────
+    [Header("Jump Settings")]
+    [SerializeField] private float jumpForce = 12f;  // Jumping power
+    [SerializeField] private int maxJumps = 1;      // Max jump count (e.g. 2 = double jump)
+
+    private int jumpsLeft;         // Remaining jumps available
+    public bool pressedJump;      // Input buffer for jump key press
+
+    // ────────────────────────────────────────────────
+    [Header("GroundCheck Settings")]
+    [SerializeField] private LayerMask groundMask;                 // Layer mask used to define ground
+    [SerializeField] private float groundCheckDistance = 0.05f;    // Ground detection distance
+
+    public bool isGrounded; // Whether the player is currently grounded
+
+    // ────────────────────────────────────────────────
+    [Header("Slope Handling Settings")]
+    [SerializeField] private float maxSlopeAngle = 45f;   // Max slope angle considered walkable
+    [SerializeField] private float slideForce = 5f;       // Force applied when sliding down a steep slope
+
+    public bool isOnSlope;         // If player is currently on a slope
+    public bool isSlopeSteep;      // If slope is steeper than maxSlopeAngle
+    public float slopeAngle;       // Measured angle of current slope
+    private RaycastHit slopeHit;   // Stores slope raycast hit info
+    private float lastTimeOnSlope; // Used for slope exit gravity handling
+
+    // ────────────────────────────────────────────────
+    [Header("Keybinds")]
+    public KeyCode jumpKey = KeyCode.Space;         // Jump key
+    public KeyCode sprintKey = KeyCode.LeftShift;   // Sprint key
+
+    // ────────────────────────────────────────────────
     [Header("DebugDraw Settings")]
-    public bool debug; // Toggle debug drawing
-    public float drawSphereSize; // Size for drawn spheres
+    public bool debug = false;            // Enable debug drawing
+    public float drawSphereSize = 0.1f;   // Size for gizmo drawing
 
+    // ────────────────────────────────────────────────
     private void Start()
     {
         jumpsLeft = maxJumps; // Initialize jump count
@@ -83,50 +94,52 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        InputManagement();
-        SpeedControl();
-        Statehandler();
-        CameraMovement();
+        InputManagement();   // Capture input
+        SpeedControl();      // Apply speed caps and friction
+        Statehandler();      // Determine current movement state
+        CameraMovement();    // Rotate camera and body
 
-        // Detect jump key pressed
+
         if (Input.GetKeyDown(jumpKey))
         {
-            pressedJump = true;
+            pressedJump = true; // Buffer jump input
         }
+        //-----Explaination-----//
+        // [Input.GetKey(jumpKey)] returns true every frame you hold down the key
+        // Causing Jump() Function gets called multiple times, and jumpsLeft-- runs each time
+
+        // [Input.GetKeyDown(jumpKey)] only return true on the frame the key is first pressed, preventing multi-jump spam.
     }
+
     private void FixedUpdate()
     {
-        isGrounded = IsGrounded();
-        isOnSlope = OnSlope();
-        isSlopeSteep = IsTooSteep();
+        isGrounded = IsGrounded();     // Check ground
+        isOnSlope = OnSlope();         // Check if on slope
+        isSlopeSteep = IsTooSteep();   // Check if slope is too steep
 
         if (isGrounded && slopeAngle >= 0 && isOnSlope)
         {
-            lastTimeOnSlope = Time.time;
+            lastTimeOnSlope = Time.time; // Record slope timestamp
         }
 
-        // Reset jumps when grounded
         if (isGrounded)
         {
-            jumpsLeft = maxJumps;
+            jumpsLeft = maxJumps; // Reset jump count when grounded
         }
 
-        ExtraGravity();
+        ExtraGravity(); // Apply gravity modifications
 
-        // Initiate Jump() Function
         if (pressedJump)
         {
             pressedJump = false;
-
-            // Check to see if [isGrounded] is true and [jumpLeft] is more than 0
             if (isGrounded || jumpsLeft > 0)
             {
-                Jump();
+                Jump(); // Perform jump if allowed
             }
         }
 
-        GroundMovement();
-        ControlDrag();
+        GroundMovement(); // Apply movement force
+        ControlDrag();    // Apply proper drag
     }
 
     private void Statehandler()
@@ -153,61 +166,64 @@ public class PersonalPlayerMovement : MonoBehaviour
     private void GroundMovement()
     {
         Vector3 dir = Vector3.zero;
-
-        // Calculate direction from input
         dir = orientation.forward * verticalInput + orientation.right * horizontalInput;
         finalDir = dir.normalized;
 
-        // Apply force based on grounded or air
+        if (debug)
+        {
+            Debug.DrawLine(FeetPosition(), FeetPosition() + finalDir * 25f, Color.green);
+        }
+
         if (isGrounded && isSlopeSteep)
         {
+            // Slide when on too steep a slope
             Vector3 slideDir = Vector3.ProjectOnPlane(Vector3.down, slopeHit.normal).normalized;
-
             playerRigidbody.AddForce(slideDir * slideForce, ForceMode.Force);
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
-
         }
         else if (isGrounded && isOnSlope)
         {
+            // Move along slope
             playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
-            //Debug.Log("Slope");
         }
         else if (isGrounded)
         {
+            // Normal flat movement
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
-            //Debug.Log("Ground");
         }
         else
         {
+            // Airborne movement
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
         }
     }
 
     private void ExtraGravity()
     {
-        // Add extra gravity in general
+        // Always apply base gravity
         playerRigidbody.AddForce(Physics.gravity * gravityMultiplier, ForceMode.Acceleration);
 
-        if (!pressedJump && !(isGrounded && isOnSlope) && Time.time < lastTimeOnSlope + extraGravityTimeAfterSlope)
+        // Apply stronger gravity shortly after leaving slope
+        if (!pressedJump && !(isGrounded && slopeAngle <= maxSlopeAngle) && Time.time < lastTimeOnSlope + extraGravityTimeAfterSlope)
         {
+            Debug.Log("Extra");
             playerRigidbody.AddForce(Physics.gravity * extraGravity, ForceMode.Acceleration);
         }
     }
 
     private void Jump()
     {
-        // Reset vertical velocity to prevent stacking
-        Vector3 currentVelocity = playerRigidbody.velocity;
-        currentVelocity.y = 0;
-        playerRigidbody.velocity = currentVelocity;
+        // Cancel current vertical velocity
+        Vector3 velocity = playerRigidbody.velocity;
+        velocity.y = 0;
+        playerRigidbody.velocity = velocity;
 
-        // Apply jump force
+        // Add upward jump force
         playerRigidbody.AddForce(jumpForce * Vector3.up, ForceMode.VelocityChange);
 
-        // Apply multiple jump force in the air
         if (!isGrounded)
         {
-            jumpsLeft--;
+            jumpsLeft--; // Reduce available jumps if mid-air
         }
     }
 
@@ -215,19 +231,21 @@ public class PersonalPlayerMovement : MonoBehaviour
     {
         if (isGrounded)
         {
+            // Apply higher drag to help stop quickly on the ground
             playerRigidbody.drag = groundDrag;
         }
         else
         {
+            // Apply lower drag in the air to allow smoother falling and air movement
             playerRigidbody.drag = airDrag;
         }
     }
 
     private void SpeedControl()
     {
-        // Limit velocity to max moveSpeed
         Vector3 flatVel = new Vector3(playerRigidbody.velocity.x, 0f, playerRigidbody.velocity.z);
 
+        // Limit velocity to max moveSpeed
         if (flatVel.magnitude > moveSpeed)
         {
             Vector3 limitedVel = flatVel.normalized * moveSpeed;
@@ -269,14 +287,16 @@ public class PersonalPlayerMovement : MonoBehaviour
 
         //Rotate the Player.
         playerBody.rotation = Quaternion.Euler(0f, yRotation, 0f);
+        //-----Explaination-----//
+        //Set the player's rotation directly
+        //Here’s how you can modify your script to unify both camera and player rotations using the same variables (xRotation and yRotation)
     }
+
     private Vector3 FeetPosition()
     {
-        // Function: Calculates bottom of capsule for ground check
-
         Vector3 sphereOffset = (playerCollider.height * transform.localScale.y / 2 - playerCollider.radius * transform.localScale.x) * -1 * transform.up;
+        //-----Explaination-----//
         // (height / 2 - radius) gives you the distance from center to bottom of the flat capsule base, before the rounded part.
-
         // (Multiply by -1 * transform.up) pushes the offset downward in world space(i.e., towards the feet), regardless of player rotation.
         // [transform.up = Depends direction depends on the value. [+1 -> Up], [0 -> Centre], [-1 -> Down]
 
@@ -288,36 +308,51 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     private bool IsGrounded()
     {
-        // Raycast check for ground
-        Vector3 upOffset = transform.up * GROUND_CHECK_SPHERE_OFFSET;
-        bool isGrounded = Physics.SphereCast(FeetPosition() + upOffset, playerCollider.radius * transform.localScale.x, -1 * transform.up, out RaycastHit info, groundCheckDistance + GROUND_CHECK_SPHERE_OFFSET, groundMask);
+        // Calculate the starting point of the SphereCast just above the feet to avoid clipping into the floor
+        Vector3 checkOrigin = FeetPosition() + transform.up * GROUND_CHECK_SPHERE_OFFSET;
 
-        return isGrounded;
+        // Define the length of the SphereCast including the offset
+        float checkDistance = groundCheckDistance + GROUND_CHECK_SPHERE_OFFSET;
+
+        // True if grounded; otherwise, false
+        return Physics.SphereCast(checkOrigin, playerCollider.radius * transform.localScale.x, -transform.up, out RaycastHit _, checkDistance, groundMask);
     }
 
     private bool OnSlope()
     {
-        Vector3 origin = FeetPosition();
-        float castDistance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
 
-        if (Physics.Raycast(origin, Vector3.down, out slopeHit, castDistance))
+        // Get the origin point for the slope check (bottom of capsule)
+        Vector3 origin = FeetPosition();
+
+        float distance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+
+        // Perform a raycast straight downward to detect the surface below the player
+        if (Physics.Raycast(origin, Vector3.down, out slopeHit, distance))
         {
+            // Calculate the angle between the hit normal and world up (i.e., how steep the surface is)
             slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+
             return slopeAngle > 0f && slopeAngle <= maxSlopeAngle;
         }
 
+        // If nothing was hit, reset slope angle and return false
         slopeAngle = 0f;
-        return false;
-    }
 
-    private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
-    {
-        return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
+        // True if on a slope and within acceptable angle; otherwise, false
+        return false;
     }
 
     private bool IsTooSteep()
     {
+        // True if too steep to walk on; otherwise, false
         return slopeAngle > maxSlopeAngle;
+    }
+
+    private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
+    {
+        // Projects movement direction onto the slope plane using the surface normal
+        // This ensures the player moves along the surface and not into it
+        return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
     }
 
     public void OnDrawGizmosSelected()
@@ -325,6 +360,8 @@ public class PersonalPlayerMovement : MonoBehaviour
         if (debug)
         {
             //[Debug Draw the Feet Positon of the Sphere in the PlayerObj.]
+            // ────────────────────────────────────────────────────────────
+
             //Gizmos.color = Color.green;
             //Vector3 sphereOffset = (playerCollider.height * transform.localScale.y / 2 - playerCollider.radius * transform.localScale.x) * -1 * transform.up;
             //Vector3 feetPosition = playerRigidbody.position + sphereOffset;
@@ -332,8 +369,9 @@ public class PersonalPlayerMovement : MonoBehaviour
             //Gizmos.DrawSphere(feetPosition, drawSphereSize);
             //Gizmos.DrawWireSphere(feetPosition, playerCollider.radius * transform.localScale.x);
 
-
             //[Debug Draws of IsGrounded() Collidiers]
+            // ───────────────────────────────────────
+
             //Gizmos.color = Color.green;
 
             //Vector3 feetOffset = -1 * transform.up * groundCheckDistance;
