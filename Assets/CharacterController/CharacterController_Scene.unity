@@ -327,6 +327,7 @@ MonoBehaviour:
   state: 0
   groundDrag: 5
   airDrag: 2
+  slidingDrag: 1
   gravityMultiplier: 1.5
   extraGravity: 2
   extraGravityTimeAfterSlope: 0.3
@@ -339,10 +340,11 @@ MonoBehaviour:
   groundCheckDistance: 0.05
   isGrounded: 0
   maxSlopeAngle: 45
-  slideForce: 5
+  maxSlideForce: 20
   isOnSlope: 0
   isSlopeSteep: 0
   slopeAngle: 0
+  slideForce: 0
   jumpKey: 32
   sprintKey: 304
   debug: 0

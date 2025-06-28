@@ -41,8 +41,9 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     // ────────────────────────────────────────────────
     [Header("Drag Settings")]
-    [SerializeField] private float groundDrag = 6f; // Drag when grounded
-    [SerializeField] private float airDrag = 2f;    // Drag when in the air
+    [SerializeField] private float groundDrag = 6f;  // Drag when grounded
+    [SerializeField] private float airDrag = 2f;     // Drag when in the air
+    [SerializeField] private float slidingDrag = 1f; // Drag when sliding
 
     // ────────────────────────────────────────────────
     [Header("Gravity Control Settings")]
@@ -68,13 +69,14 @@ public class PersonalPlayerMovement : MonoBehaviour
     // ────────────────────────────────────────────────
     [Header("Slope Handling Settings")]
     [SerializeField] private float maxSlopeAngle = 45f;   // Max slope angle considered walkable
-    [SerializeField] private float slideForce = 5f;       // Force applied when sliding down a steep slope
+    [SerializeField] private float maxSlideForce = 20f;   // Max force applied when sliding down a steep slope
 
     public bool isOnSlope;         // If player is currently on a slope
     public bool isSlopeSteep;      // If slope is steeper than maxSlopeAngle
     public float slopeAngle;       // Measured angle of current slope
     private RaycastHit slopeHit;   // Stores slope raycast hit info
     private float lastTimeOnSlope; // Used for slope exit gravity handling
+    public float slideForce;      // Used for force applied when sliding down a steep slope
 
     // ────────────────────────────────────────────────
     [Header("Keybinds")]
@@ -177,8 +179,8 @@ public class PersonalPlayerMovement : MonoBehaviour
         if (isGrounded && isSlopeSteep)
         {
             // Slide when on too steep a slope
-            Vector3 slideDir = Vector3.ProjectOnPlane(Vector3.down, slopeHit.normal).normalized;
-            playerRigidbody.AddForce(slideDir * slideForce, ForceMode.Force);
+            playerRigidbody.AddForce(GetSlopeSlideDirection(), ForceMode.Force);
+
             playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
         }
         else if (isGrounded && isOnSlope)
@@ -229,6 +231,11 @@ public class PersonalPlayerMovement : MonoBehaviour
 
     private void ControlDrag()
     {
+        if (isGrounded && isSlopeSteep)
+        {
+            // Apply lower drag when sliding
+            playerRigidbody.drag = slidingDrag;
+        }
         if (isGrounded)
         {
             // Apply higher drag to help stop quickly on the ground
@@ -346,6 +353,33 @@ public class PersonalPlayerMovement : MonoBehaviour
     {
         // True if too steep to walk on; otherwise, false
         return slopeAngle > maxSlopeAngle;
+    }
+
+    private Vector3 GetSlopeSlideDirection()
+    {
+        // Get the origin point for the slope check (bottom of capsule)
+        Vector3 origin = FeetPosition();
+
+        float distance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+
+        // Perform a raycast straight downward to detect the surface below the player
+        if (Physics.Raycast(origin, Vector3.down, out slopeHit, distance))
+        {
+            // Calculate the angle between the hit normal and world up (i.e., how steep the surface is)
+            slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+
+            if (slopeAngle > maxSlopeAngle)
+            {
+                float t = Mathf.InverseLerp(maxSlopeAngle, 70f, slopeAngle); // Tweak 70f if needed
+                slideForce = Mathf.Lerp(30f, maxSlideForce, t); // Adds a minimum slide nudge
+
+                //slideForce = Mathf.Lerp(0f, maxSlideForce, (slopeAngle - maxSlopeAngle) / (70f - maxSlopeAngle));
+                Vector3 slideDir = Vector3.ProjectOnPlane(Vector3.down, slopeHit.normal).normalized;
+                return slideDir * slideForce;
+            }
+        }
+
+        return Vector3.zero; // No sliding needed
     }
 
     private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
