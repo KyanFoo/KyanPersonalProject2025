@@ -36,8 +36,8 @@ namespace KyanPersonalProject2025.CharacterController6
         [Space]
         public bool debug;
 
-        private Rigidbody playerRigidbody;
-        private CapsuleCollider playerCollider;
+        public Rigidbody playerRigidbody;
+        public CapsuleCollider playerCollider;
 
         private int jumpsLeft;
         private bool isGrounded;

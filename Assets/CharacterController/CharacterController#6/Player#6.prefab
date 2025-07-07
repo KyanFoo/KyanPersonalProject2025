@@ -283,7 +283,9 @@ MonoBehaviour:
   gravityMultiplier: 1
   extraGravity: 2
   extraGravityTimeAfterSlope: 0.2
-  debug: 1
+  debug: 0
+  playerRigidbody: {fileID: 5816230548591993407}
+  playerCollider: {fileID: 3118955542211016062}
 --- !u!1 &9130444595407895114
 GameObject:
   m_ObjectHideFlags: 0
