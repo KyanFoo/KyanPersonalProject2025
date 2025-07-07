@@ -20530,11 +20530,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2257532199187840968, guid: dcfcd294ce319d64a8bd4da755470ff9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.55
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 2257532199187840968, guid: dcfcd294ce319d64a8bd4da755470ff9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.133
+      value: 0.515
       objectReference: {fileID: 0}
     - target: {fileID: 6456913684330960387, guid: dcfcd294ce319d64a8bd4da755470ff9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -20749,17 +20749,42 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8432101460957327243, guid: 3f26ef85e76b2ba4f9404681f2116f43, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.55
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 8432101460957327243, guid: 3f26ef85e76b2ba4f9404681f2116f43, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.133
+      value: 0.515
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 323017886390548557, guid: 3f26ef85e76b2ba4f9404681f2116f43, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3672927149018451851}
   m_SourcePrefab: {fileID: 100100000, guid: 3f26ef85e76b2ba4f9404681f2116f43, type: 3}
+--- !u!1 &3672927149018451850 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 323017886390548557, guid: 3f26ef85e76b2ba4f9404681f2116f43, type: 3}
+  m_PrefabInstance: {fileID: 3672927149018451849}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3672927149018451851
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3672927149018451850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 68bb026fafb42b14791938953eaace77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_NoiseProfile: {fileID: 11400000, guid: a3dacaec0287d7444b4bd276816e1666, type: 2}
+  m_PivotOffset: {x: 0, y: 0, z: 0}
+  m_AmplitudeGain: 1
+  m_FrequencyGain: 1
+  mNoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1001 &4530676334161992042
 PrefabInstance:
   m_ObjectHideFlags: 0
