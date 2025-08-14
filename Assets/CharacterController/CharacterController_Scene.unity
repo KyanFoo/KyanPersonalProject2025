@@ -5626,7 +5626,6 @@ GameObject:
   - component: {fileID: 330539627}
   - component: {fileID: 330539630}
   - component: {fileID: 330539629}
-  - component: {fileID: 330539628}
   m_Layer: 0
   m_Name: Eye
   m_TagString: Untagged
@@ -5649,27 +5648,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1491960423}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &330539628
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330539626}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &330539629
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -12617,20 +12595,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocityMagnitude: 0
-  moveSpeed: 7
+  walkSpeed: 7
+  sprintSpeed: 10
   groundDrag: 5
   jumpForce: 12
   jumpCooldown: 0.25
   airMultiplier: 0.4
   readyToJump: 0
   jumpKey: 32
+  sprintKey: 304
   playerHeight: 2
   whatIsGround:
     serializedVersion: 2
     m_Bits: 8
   grounded: 0
+  maxSlopeAngle: 50
   orientation: {fileID: 690206954}
-  rb: {fileID: 0}
+  rb: {fileID: 1038415649}
+  state: 0
 --- !u!1 &1048561842
 GameObject:
   m_ObjectHideFlags: 0
