@@ -4,156 +4,159 @@ using Cinemachine;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+namespace KyanPersonalProject2025.CharacterController2
 {
-    [Header("Reference")]
-    private CharacterController characterController;
-    [SerializeField] private CinemachineVirtualCamera virtualCamera;
-
-    private float xRotation;
-
-    [Header("Movement Setting")]
-    [SerializeField] private float moveSpeed = 5f;
-    [SerializeField] private float sprintSpeedMultiplier = 2f;
-    [SerializeField] private float sprintTransitSpeed = 5f;
-    [SerializeField] private float gravity = 9.81f;
-    [SerializeField] private float jumpHeight = 2f;
-
-    private float verticalVelocity;
-    private float currentSpeed;
-    private float currentSpeedMultiplier;
-
-    [Header("Camera Bob")]
-    [SerializeField] private float bobFrequency = 1f;
-    [SerializeField] private float bobAmplitude = 1f;
-
-    private CinemachineBasicMultiChannelPerlin noiseComponent;
-
-    [Header("Input")]
-    [SerializeField] private float mouseSensitivity;
-    private float moveInput;
-    private float turnInput;
-    private float mouseX;
-    private float mouseY;
-
-    // Start is called before the first frame update
-    void Start()
+    public class PlayerController : MonoBehaviour
     {
-        characterController = GetComponent<CharacterController>();
+        [Header("Reference")]
+        private CharacterController characterController;
+        [SerializeField] private CinemachineVirtualCamera virtualCamera;
 
-        noiseComponent = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
-    }
+        private float xRotation;
 
-    // Update is called once per frame
-    void Update()
-    {
-        InputManagement();
-        Movement();
-    }
+        [Header("Movement Setting")]
+        [SerializeField] private float moveSpeed = 5f;
+        [SerializeField] private float sprintSpeedMultiplier = 2f;
+        [SerializeField] private float sprintTransitSpeed = 5f;
+        [SerializeField] private float gravity = 9.81f;
+        [SerializeField] private float jumpHeight = 2f;
 
-    private void LateUpdate()
-    {
-        CameraBob();
-    }
+        private float verticalVelocity;
+        private float currentSpeed;
+        private float currentSpeedMultiplier;
 
-    private void Movement()
-    {
-        GroundMovement();
-        Turn();
-    }
+        [Header("Camera Bob")]
+        [SerializeField] private float bobFrequency = 1f;
+        [SerializeField] private float bobAmplitude = 1f;
 
-    private void GroundMovement()
-    {
-        // Create a movement vector based on player input.
-        Vector3 move = new Vector3(turnInput, 0, moveInput);
+        private CinemachineBasicMultiChannelPerlin noiseComponent;
 
-        // Makes movement relative to the camera's facing direction.
-        move = virtualCamera.transform.TransformDirection(move);
+        [Header("Input")]
+        [SerializeField] private float mouseSensitivity;
+        private float moveInput;
+        private float turnInput;
+        private float mouseX;
+        private float mouseY;
 
-        // Apply sprint speed multiplier if holding Left Shift.
-        if (Input.GetKey(KeyCode.LeftShift))
+        // Start is called before the first frame update
+        void Start()
         {
-            currentSpeedMultiplier = sprintSpeedMultiplier;
-        }
-        else
-        {
-            currentSpeedMultiplier = 1f;
+            characterController = GetComponent<CharacterController>();
+
+            noiseComponent = virtualCamera.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>();
         }
 
-        // Smoothly adjust current speed towards the target speed.
-        currentSpeed = Mathf.Lerp(currentSpeed, moveSpeed * currentSpeedMultiplier, sprintTransitSpeed * Time.deltaTime);
-
-        move *= currentSpeed;
-
-        // Add vertical movement forces (e.g., gravity or jump).
-        move.y = VerticalForceCalculation();
-
-        // Move the character controller.
-        characterController.Move(move * Time.deltaTime);
-    }
-
-    private void Turn()
-    {
-        //Adjust mouse Sensitivity.
-        mouseX *= mouseSensitivity * Time.deltaTime;
-        mouseY *= mouseSensitivity * Time.deltaTime;
-
-        xRotation -= mouseY;
-
-        //Prevent overrotation.
-        xRotation = Mathf.Clamp(xRotation, -90, 90);
-
-        virtualCamera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
-
-        //Rotating the Player.
-        transform.Rotate(Vector3.up * mouseX);
-    }
-
-    private void CameraBob()
-    {
-        //Grounded, Shake.
-        if (characterController.isGrounded && characterController.velocity.magnitude > 0.1f)
+        // Update is called once per frame
+        void Update()
         {
-            noiseComponent.m_FrequencyGain = bobFrequency * currentSpeedMultiplier;
-            noiseComponent.m_AmplitudeGain = bobAmplitude * currentSpeedMultiplier;
+            InputManagement();
+            Movement();
         }
-        //Not Grounded, No Shake.
-        else
+
+        private void LateUpdate()
         {
-            noiseComponent.m_FrequencyGain = 0.0f;
-            noiseComponent.m_AmplitudeGain = 0.0f;
+            CameraBob();
         }
-    }
 
-    private float VerticalForceCalculation()
-    {
-        if (characterController.isGrounded)
+        private void Movement()
         {
-            //Ensure that the plyaer maintain contact to the ground and doesn't start to float.
-            verticalVelocity = -1f;
+            GroundMovement();
+            Turn();
+        }
 
-            if (Input.GetButtonDown("Jump"))
+        private void GroundMovement()
+        {
+            // Create a movement vector based on player input.
+            Vector3 move = new Vector3(turnInput, 0, moveInput);
+
+            // Makes movement relative to the camera's facing direction.
+            move = virtualCamera.transform.TransformDirection(move);
+
+            // Apply sprint speed multiplier if holding Left Shift.
+            if (Input.GetKey(KeyCode.LeftShift))
             {
-                //Calculate the intial velocty needed to reach to the desire height, factoring in gravity pull.
-                verticalVelocity = Mathf.Sqrt(jumpHeight * gravity * 2);
+                currentSpeedMultiplier = sprintSpeedMultiplier;
+            }
+            else
+            {
+                currentSpeedMultiplier = 1f;
+            }
+
+            // Smoothly adjust current speed towards the target speed.
+            currentSpeed = Mathf.Lerp(currentSpeed, moveSpeed * currentSpeedMultiplier, sprintTransitSpeed * Time.deltaTime);
+
+            move *= currentSpeed;
+
+            // Add vertical movement forces (e.g., gravity or jump).
+            move.y = VerticalForceCalculation();
+
+            // Move the character controller.
+            characterController.Move(move * Time.deltaTime);
+        }
+
+        private void Turn()
+        {
+            //Adjust mouse Sensitivity.
+            mouseX *= mouseSensitivity * Time.deltaTime;
+            mouseY *= mouseSensitivity * Time.deltaTime;
+
+            xRotation -= mouseY;
+
+            //Prevent overrotation.
+            xRotation = Mathf.Clamp(xRotation, -90, 90);
+
+            virtualCamera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
+
+            //Rotating the Player.
+            transform.Rotate(Vector3.up * mouseX);
+        }
+
+        private void CameraBob()
+        {
+            //Grounded, Shake.
+            if (characterController.isGrounded && characterController.velocity.magnitude > 0.1f)
+            {
+                noiseComponent.m_FrequencyGain = bobFrequency * currentSpeedMultiplier;
+                noiseComponent.m_AmplitudeGain = bobAmplitude * currentSpeedMultiplier;
+            }
+            //Not Grounded, No Shake.
+            else
+            {
+                noiseComponent.m_FrequencyGain = 0.0f;
+                noiseComponent.m_AmplitudeGain = 0.0f;
             }
         }
-        else
+
+        private float VerticalForceCalculation()
         {
-            //Simulate falling.
-            verticalVelocity -= gravity * Time.deltaTime;
+            if (characterController.isGrounded)
+            {
+                //Ensure that the plyaer maintain contact to the ground and doesn't start to float.
+                verticalVelocity = -1f;
+
+                if (Input.GetButtonDown("Jump"))
+                {
+                    //Calculate the intial velocty needed to reach to the desire height, factoring in gravity pull.
+                    verticalVelocity = Mathf.Sqrt(jumpHeight * gravity * 2);
+                }
+            }
+            else
+            {
+                //Simulate falling.
+                verticalVelocity -= gravity * Time.deltaTime;
+            }
+            return verticalVelocity;
         }
-        return verticalVelocity;
-    }
 
-    private void InputManagement()
-    {
-        // Gather inputs from the WASD keys for movement.
-        moveInput = Input.GetAxis("Vertical");
-        turnInput = Input.GetAxis("Horizontal");
+        private void InputManagement()
+        {
+            // Gather inputs from the WASD keys for movement.
+            moveInput = Input.GetAxis("Vertical");
+            turnInput = Input.GetAxis("Horizontal");
 
-        //Gather input from the mouse for camera movement.
-        mouseX = Input.GetAxis("Mouse X");
-        mouseY = Input.GetAxis("Mouse Y");
+            //Gather input from the mouse for camera movement.
+            mouseX = Input.GetAxis("Mouse X");
+            mouseY = Input.GetAxis("Mouse Y");
+        }
     }
 }
