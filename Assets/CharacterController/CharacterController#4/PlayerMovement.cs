@@ -53,6 +53,8 @@ namespace KyanPersonalProject2025.CharacterController4
         private float sideways;
         private float timeOfLastMove;
 
+        public float sphereSize;
+
         void Start()
         {
             // Reset jumps
@@ -258,8 +260,21 @@ namespace KyanPersonalProject2025.CharacterController4
         {
             if (debug)
             {
-                Vector3 feetOffset = -1 * groundCheckDistance * transform.up;
-                Gizmos.DrawWireSphere(FeetPosition() + feetOffset, playerCollider.radius * transform.localScale.x);
+                // Draw a WireSphere to visualize a FeetPosition Collidier for Player Prefab for Ground & Slope Check.
+                //Vector3 feetOffset = -1 * groundCheckDistance * transform.up;
+                //Gizmos.DrawWireSphere(FeetPosition() + feetOffset, playerCollider.radius * transform.localScale.x);
+
+                //---Testing---//
+                Vector3 sphereOffset = (playerCollider.height * transform.localScale.y / 2 - playerCollider.radius * transform.localScale.x) * -1 * transform.up;
+                Vector3 feetPosition = playerRigidbody.position + sphereOffset;
+
+                // Draw a colour sphere at the [Feet Position] of the Player Prefab.
+                Gizmos.color = Color.green;
+                Gizmos.DrawSphere(feetPosition, sphereSize);
+
+                // Draw a line between the Player Prefab centre position and [Feet Position].
+                //Gizmos.color = Color.yellow;
+                //Gizmos.DrawLine(playerRigidbody.position, feetPosition); // Line from center to feet
             }
         }
     }
