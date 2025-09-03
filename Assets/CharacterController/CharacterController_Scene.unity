@@ -26229,9 +26229,13 @@ MonoBehaviour:
   walkSpeed: 7
   sprintSpeed: 10
   airControlMultiplier: 0.4
+  velocityMagnitude: 0
   state: 0
   groundDrag: 6
   airDrag: 2
+  jumpForce: 12
+  maxJumps: 2
+  pressedJump: 0
   groundMask:
     serializedVersion: 2
     m_Bits: 8

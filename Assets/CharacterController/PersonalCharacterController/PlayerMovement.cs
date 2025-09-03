@@ -31,7 +31,9 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [SerializeField] private float walkSpeed = 7f;     
         [SerializeField] private float sprintSpeed = 10f;
         [SerializeField] private float airControlMultiplier = 0.4f;
+        [SerializeField] public float velocityMagnitude;
         private float moveSpeed;
+        private float minVelocity = 0.1f;
 
         public enum MovementState { walking, sprinting, air }
         [SerializeField] private MovementState state;
@@ -39,6 +41,12 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("Drag Settings")]
         [SerializeField] private float groundDrag = 6f;
         [SerializeField] private float airDrag = 2f;
+
+       [Header("Jump Settings")]
+        [SerializeField] private float jumpForce = 12f;
+        [SerializeField] private int maxJumps = 1;
+        public int jumpsLeft;
+        public bool pressedJump;
 
         [Header("GroundCheck Settings")]
         public LayerMask groundMask = 1;
@@ -53,22 +61,45 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("Debug Settings")]
         public bool debug;
 
-        void Start()
+        private void Start()
         {
-            // Assign Rigidbody and PlayerCollider.
-            playerRigidbody = GetComponent<Rigidbody>();
-            playerCollider = GetComponent<CapsuleCollider>();
+            jumpsLeft = maxJumps;
         }
 
         private void Update()
         {
             InputManagement();
+            SpeedControl();
             Statehandler();
             CameraMovement();
+
+            if (Input.GetKeyDown(jumpKey))
+            {
+                pressedJump = true; // Buffer jump input
+            }
+            //-----Explaination-----//
+            // [Input.GetKey(jumpKey)] returns true every frame you hold down the key
+            // Causing Jump() Function gets called multiple times, and jumpsLeft-- runs each time
+
+            // [Input.GetKeyDown(jumpKey)] only return true on the frame the key is first pressed, preventing multi-jump spam.
         }
         private void FixedUpdate()
         {
             isGrounded = IsGrounded();
+
+            if (isGrounded)
+            {
+                jumpsLeft = maxJumps;
+            }
+
+            if (pressedJump)
+            {
+                pressedJump = false;
+                if (isGrounded || jumpsLeft > 0)
+                {
+                    Jump();
+                }
+            }
 
             GroundMovement();
             ControlDrag();
@@ -111,6 +142,23 @@ namespace KyanPersonalProject2025.PersonalCharacterController
                 // Normal flat movement
                 playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
             }
+            else
+            {
+                // Airborne movement
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+            }
+        }
+
+        private void Jump()
+        {
+            // Cancel current vertical velocity
+            Vector3 velocity = playerRigidbody.velocity;
+            velocity.y = 0;
+            playerRigidbody.velocity = velocity;
+
+            // Add upward jump force
+            playerRigidbody.AddForce(jumpForce * Vector3.up, ForceMode.VelocityChange);
+            jumpsLeft--;
         }
 
         private void ControlDrag()
@@ -124,6 +172,35 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             {
                 // Apply lower drag in the air to allow smoother falling and air movement
                 playerRigidbody.drag = airDrag;
+            }
+        }
+
+        private void SpeedControl()
+        {
+            Vector3 flatVel = new Vector3(playerRigidbody.velocity.x, 0f, playerRigidbody.velocity.z);
+
+            // Limit velocity to max moveSpeed
+            if (flatVel.magnitude > moveSpeed)
+            {
+                Vector3 limitedVel = flatVel.normalized * moveSpeed;
+                playerRigidbody.velocity = new Vector3(limitedVel.x, playerRigidbody.velocity.y, limitedVel.z);
+            }
+
+            velocityMagnitude = flatVel.magnitude;
+
+            // Apply friction when idle on ground
+            if (finalDir == Vector3.zero && isGrounded)
+            {
+                if (playerRigidbody.velocity.magnitude < minVelocity)
+                {
+                    playerRigidbody.velocity = Vector3.zero;
+                }
+                else
+                {
+                    // Apply friction opposite to velocity
+                    Vector3 frictionForce = -playerRigidbody.velocity.normalized * groundDrag;
+                    playerRigidbody.AddForce(frictionForce);
+                }
             }
         }
 
