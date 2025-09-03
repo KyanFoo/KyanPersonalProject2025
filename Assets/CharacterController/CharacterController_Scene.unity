@@ -26221,9 +26221,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   virtualCamera: {fileID: 1744909165}
   playerObj: {fileID: 1876922385}
+  playerRigidbody: {fileID: 1876922386}
+  playerCollider: {fileID: 1876922387}
   orientation: {fileID: 1983934503}
   sensX: 150
   sensY: 150
+  walkSpeed: 7
+  sprintSpeed: 10
+  airControlMultiplier: 0.4
+  state: 0
+  groundDrag: 6
+  airDrag: 2
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheckDistance: 0.05
+  isGrounded: 0
+  jumpKey: 32
+  sprintKey: 304
+  debug: 1
 --- !u!43 &1894900711
 Mesh:
   m_ObjectHideFlags: 0
