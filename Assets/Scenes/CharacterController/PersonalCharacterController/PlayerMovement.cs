@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using Cinemachine;
 using UnityEngine;
+using static KyanPersonalProject2025.CharacterController1.PlayerMovement;
 
 namespace KyanPersonalProject2025.PersonalCharacterController
 {
@@ -14,6 +16,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [SerializeField] private Transform playerBody;
         [SerializeField] private Rigidbody playerRigidbody;
         [SerializeField] private CapsuleCollider playerCollider;
+        [SerializeField] private Transform orientation;
 
         [Header("Input Settings")]
         [SerializeField] private float sensX; 
@@ -27,11 +30,33 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         private float xRotation;
         private float yRotation;
 
+        private Vector3 finalDir;
+
+        [Header("Movement Settings")]
+        [SerializeField] private float walkSpeed = 7f;
+        [SerializeField] private float sprintSpeed = 10f;
+        [SerializeField] private float airControlMultiplier = 0.4f;
+        [SerializeField] private float velocityMagnitude;
+
+        private float moveSpeed;
+        private float minVelocity = 0.1f;
+
+        public enum MovementState { walking, sprinting, air }
+        [SerializeField] private MovementState state;
+
+        [Header("Drag Settings")]
+        [SerializeField] private float groundDrag = 6f;
+        [SerializeField] private float airDrag = 2f;
+
         [Header("GroundCheck Settings")]
         [SerializeField] private LayerMask groundMask;
         [SerializeField] private float groundCheckDistance = 0.05f;
 
         public bool isGrounded;
+
+        [Header("Keybinds")]
+        public KeyCode jumpKey = KeyCode.Space;
+        public KeyCode sprintKey = KeyCode.LeftShift;
 
         [Header("DebugDraw Settings")]
         public bool debug = false;
@@ -39,12 +64,104 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         private void Update()
         {
             InputManagement();
+            SpeedControl();
+            StateHandler();
             CameraMovement();
         }
 
         private void FixedUpdate()
         {
             isGrounded = IsGrounded();
+
+            GroundMovement();
+            ControlDrag();
+        }
+
+        private void StateHandler()
+        {
+            // Mode - Sprinting
+            if (isGrounded && Input.GetKey(sprintKey))
+            {
+                state = MovementState.sprinting;
+                moveSpeed = sprintSpeed;
+            }
+            // Mode - Walking
+            else if (isGrounded)
+            {
+                state = MovementState.walking;
+                moveSpeed = walkSpeed;
+            }
+            // Mode - Air
+            else
+            {
+                state = MovementState.air;
+            }
+        }
+
+        private void GroundMovement()
+        {
+            Vector3 dir = Vector3.zero;
+            dir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+            finalDir = dir.normalized;
+
+            if (debug)
+            {
+                Debug.DrawLine(FeetPosition(), FeetPosition() + finalDir * 25f, Color.green);
+            }
+
+            if (isGrounded)
+            {
+                // Normal flat movement
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+            }
+            else
+            {
+                // Airborne movement
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+            }
+        }
+
+        private void ControlDrag()
+        {
+            if (isGrounded)
+            {
+                // Apply higher drag to help stop quickly on the ground
+                playerRigidbody.drag = groundDrag;
+            }
+            else
+            {
+                // Apply lower drag in the air to allow smoother falling and air movement
+                playerRigidbody.drag = airDrag;
+            }
+        }
+
+        private void SpeedControl()
+        {
+            Vector3 flatVel = new Vector3(playerRigidbody.velocity.x, 0f, playerRigidbody.velocity.z);
+
+            // Limit velocity to max moveSpeed
+            if (flatVel.magnitude > moveSpeed)
+            {
+                Vector3 limitedVel = flatVel.normalized * moveSpeed;
+                playerRigidbody.velocity = new Vector3(limitedVel.x, playerRigidbody.velocity.y, limitedVel.z);
+            }
+
+            velocityMagnitude = flatVel.magnitude; // optional: for debugging or UI
+
+            // Apply friction when idle on ground
+            if (finalDir == Vector3.zero && isGrounded)
+            {
+                if (playerRigidbody.velocity.magnitude < minVelocity)
+                {
+                    playerRigidbody.velocity = Vector3.zero;
+                }
+                else
+                {
+                    // Apply friction opposite to velocity
+                    Vector3 frictionForce = -playerRigidbody.velocity.normalized * groundDrag;
+                    playerRigidbody.AddForce(frictionForce);
+                }
+            }
         }
 
         private void CameraMovement()
@@ -91,12 +208,12 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         private void InputManagement()
         {
             // Gather inputs from the WASD keys for movement.
-            verticalInput = Input.GetAxis("Vertical");
-            horizontalInput = Input.GetAxis("Horizontal");
+            verticalInput = Input.GetAxisRaw("Vertical");
+            horizontalInput = Input.GetAxisRaw("Horizontal");
 
             //Gather input from the mouse for camera movement.
-            mouseX = Input.GetAxis("Mouse X");
-            mouseY = Input.GetAxis("Mouse Y");
+            mouseX = Input.GetAxisRaw("Mouse X");
+            mouseY = Input.GetAxisRaw("Mouse Y");
         }
 
         private void OnDrawGizmos() // --- Debug gizmos for visualizing ground check ---
