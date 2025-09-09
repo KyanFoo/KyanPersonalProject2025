@@ -4724,8 +4724,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   virtualCamera: {fileID: 1851508353}
   playerBody: {fileID: 1425547774}
+  playerRigidbody: {fileID: 1425547776}
+  playerCollider: {fileID: 1425547775}
   sensX: 150
   sensY: 150
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheckDistance: 0.05
+  isGrounded: 0
+  debug: 1
 --- !u!1 &1429352114
 GameObject:
   m_ObjectHideFlags: 0
