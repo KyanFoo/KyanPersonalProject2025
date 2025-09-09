@@ -48,6 +48,13 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [SerializeField] private float groundDrag = 6f;
         [SerializeField] private float airDrag = 2f;
 
+        [Header("Jump Settings")]
+        [SerializeField] private float jumpForce = 12f;
+        [SerializeField] private int maxJumps = 1;
+
+        private int jumpsLeft;
+        public bool pressedJump;
+
         [Header("GroundCheck Settings")]
         [SerializeField] private LayerMask groundMask;
         [SerializeField] private float groundCheckDistance = 0.05f;
@@ -61,17 +68,41 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("DebugDraw Settings")]
         public bool debug = false;
 
+        private void Start()
+        {
+            jumpsLeft = maxJumps;
+        }
+
         private void Update()
         {
             InputManagement();
             SpeedControl();
             StateHandler();
             CameraMovement();
+
+            if (Input.GetKeyDown(jumpKey))
+            {
+                pressedJump = true;
+            }
         }
 
         private void FixedUpdate()
         {
             isGrounded = IsGrounded();
+
+            if (isGrounded)
+            {
+                jumpsLeft = maxJumps; // Reset jump count when grounded
+            }
+
+            if (pressedJump)
+            {
+                pressedJump = false;
+                if (isGrounded || jumpsLeft > 0)
+                {
+                    Jump(); // Perform jump if allowed
+                }
+            }
 
             GroundMovement();
             ControlDrag();
@@ -118,6 +149,22 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             {
                 // Airborne movement
                 playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+            }
+        }
+
+        private void Jump()
+        {
+            // Cancel current vertical velocity
+            Vector3 velocity = playerRigidbody.velocity;
+            velocity.y = 0;
+            playerRigidbody.velocity = velocity;
+
+            // Add upward jump force
+            playerRigidbody.AddForce(jumpForce * Vector3.up, ForceMode.VelocityChange);
+
+            if (!isGrounded)
+            {
+                jumpsLeft--; // Reduce available jumps if mid-air
             }
         }
 
