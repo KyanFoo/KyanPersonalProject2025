@@ -4736,11 +4736,20 @@ MonoBehaviour:
   state: 0
   groundDrag: 6
   airDrag: 2
+  jumpForce: 12
+  maxJumps: 1
+  pressedJump: 0
   groundMask:
     serializedVersion: 2
     m_Bits: 8
   groundCheckDistance: 0.05
   isGrounded: 0
+  maxSlopeAngle: 45
+  maxSlideForce: 20
+  isOnSlope: 0
+  isSlopeSteep: 0
+  slopeAngle: 20
+  slideForce: 4
   jumpKey: 32
   sprintKey: 304
   debug: 1

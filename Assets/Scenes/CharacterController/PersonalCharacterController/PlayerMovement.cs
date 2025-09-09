@@ -47,6 +47,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("Drag Settings")]
         [SerializeField] private float groundDrag = 6f;
         [SerializeField] private float airDrag = 2f;
+        [SerializeField] private float slidingDrag = 1f;
 
         [Header("Jump Settings")]
         [SerializeField] private float jumpForce = 12f;
@@ -60,6 +61,17 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [SerializeField] private float groundCheckDistance = 0.05f;
 
         public bool isGrounded;
+
+        [Header("Slope Handling Settings")]
+        [SerializeField] private float maxSlopeAngle = 45f;
+        [SerializeField] private float maxSlideForce = 20f;
+
+        public bool isOnSlope;
+        public bool isSlopeSteep;
+        public float slopeAngle;
+        private RaycastHit slopeHit;
+        private float lastTimeOnSlope;
+        public float slideForce;
 
         [Header("Keybinds")]
         public KeyCode jumpKey = KeyCode.Space;
@@ -89,6 +101,13 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         private void FixedUpdate()
         {
             isGrounded = IsGrounded();
+            isOnSlope = OnSlope();
+            isSlopeSteep = IsTooSteep();
+
+            if (isGrounded && slopeAngle >= 0 && isOnSlope)
+            {
+                lastTimeOnSlope = Time.time; // Record slope timestamp
+            }
 
             if (isGrounded)
             {
@@ -140,7 +159,19 @@ namespace KyanPersonalProject2025.PersonalCharacterController
                 Debug.DrawLine(FeetPosition(), FeetPosition() + finalDir * 25f, Color.green);
             }
 
-            if (isGrounded)
+            if (isGrounded && isSlopeSteep)
+            {
+                // Slide when on too steep a slope
+                playerRigidbody.AddForce(GetSlopeSlideDirection(), ForceMode.Force);
+
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+            }
+            else if (isGrounded && isOnSlope)
+            {
+                // Move along slope
+                playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
+            }
+            else if (isGrounded)
             {
                 // Normal flat movement
                 playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
@@ -170,6 +201,11 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
         private void ControlDrag()
         {
+            if (isGrounded && isSlopeSteep)
+            {
+                // Apply lower drag when sliding
+                playerRigidbody.drag = slidingDrag;
+            }
             if (isGrounded)
             {
                 // Apply higher drag to help stop quickly on the ground
@@ -250,6 +286,70 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
             // True if grounded; otherwise, false
             return Physics.SphereCast(checkOrigin, playerCollider.radius * transform.localScale.x, -transform.up, out RaycastHit _, checkDistance, groundMask);
+        }
+
+        private bool OnSlope()
+        {
+
+            // Get the origin point for the slope check (bottom of capsule)
+            Vector3 origin = FeetPosition();
+
+            float distance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+
+            // Perform a raycast straight downward to detect the surface below the player
+            if (Physics.Raycast(origin, Vector3.down, out slopeHit, distance))
+            {
+                // Calculate the angle between the hit normal and world up (i.e., how steep the surface is)
+                slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+
+                return slopeAngle > 0f && slopeAngle <= maxSlopeAngle;
+            }
+
+            // If nothing was hit, reset slope angle and return false
+            slopeAngle = 0f;
+
+            // True if on a slope and within acceptable angle; otherwise, false
+            return false;
+        }
+
+        private bool IsTooSteep()
+        {
+            // True if too steep to walk on; otherwise, false
+            return slopeAngle > maxSlopeAngle;
+        }
+
+        private Vector3 GetSlopeSlideDirection()
+        {
+            // Get the origin point for the slope check (bottom of capsule)
+            Vector3 origin = FeetPosition();
+
+            float distance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+
+            // Perform a raycast straight downward to detect the surface below the player
+            if (Physics.Raycast(origin, Vector3.down, out slopeHit, distance))
+            {
+                // Calculate the angle between the hit normal and world up (i.e., how steep the surface is)
+                slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+
+                if (slopeAngle > maxSlopeAngle)
+                {
+                    float t = Mathf.InverseLerp(maxSlopeAngle, 70f, slopeAngle); // Tweak 70f if needed
+                    slideForce = Mathf.Lerp(30f, maxSlideForce, t); // Adds a minimum slide nudge
+
+                    //slideForce = Mathf.Lerp(0f, maxSlideForce, (slopeAngle - maxSlopeAngle) / (70f - maxSlopeAngle));
+                    Vector3 slideDir = Vector3.ProjectOnPlane(Vector3.down, slopeHit.normal).normalized;
+                    return slideDir * slideForce;
+                }
+            }
+
+            return Vector3.zero; // No sliding needed
+        }
+
+        private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
+        {
+            // Projects movement direction onto the slope plane using the surface normal
+            // This ensures the player moves along the surface and not into it
+            return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
         }
 
         private void InputManagement()
