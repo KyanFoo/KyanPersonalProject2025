@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using Cinemachine;
 using UnityEngine;
 using static KyanPersonalProject2025.CharacterController1.PlayerMovement;
@@ -79,6 +78,20 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
         [Header("DebugDraw Settings")]
         public bool debug = false;
+
+        [System.Flags] public enum DebugTesting
+        {
+            None = 0,        // Always have a "None" option
+            Debug1_FeetPosition = 1 << 0,   // 1
+            Debug2_CastIsGrounded = 1 << 1,   // 2
+            Debug3_IsGrounded = 1 << 2,   // 4
+            Debug4_LerpMotion = 1 << 3,   // 8
+            Debug5 = 1 << 4,   // 16
+            Debug6 = 1 << 5,   // 32
+            Debug7 = 1 << 6    // 64
+        }
+        public DebugTesting debugTypes;
+        [Range(0f, 1f)][SerializeField] float debugCastProgress = 0f; // 0 = start, 1 = end
 
         private void Start()
         {
@@ -367,9 +380,43 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         {
             if (debug)
             {
-                // Draw a WireSphere to visualize a FeetPosition Collidier for Player Prefab for Ground & Slope Check.
-                Vector3 feetOffset = -1 * groundCheckDistance * transform.up;
-                Gizmos.DrawWireSphere(FeetPosition() + feetOffset, playerCollider.radius * transform.localScale.x);
+                if (debugTypes.HasFlag(DebugTesting.Debug1_FeetPosition))
+                {
+                    //Draw a WireSphere to show the FeetPosition point. ###
+                    Gizmos.DrawWireSphere(FeetPosition(), playerCollider.radius * transform.localScale.x);
+                }
+
+                if (debugTypes.HasFlag(DebugTesting.Debug2_CastIsGrounded))
+                {
+                    //Draw a WireSphere to show the IsGrounded point slightly above the FeetPositon to avoid clipping. ###
+                    Vector3 checkOrigin = FeetPosition() + transform.up * GROUND_CHECK_SPHERE_OFFSET;
+
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawWireSphere(checkOrigin, playerCollider.radius * transform.localScale.x);
+                }
+
+                if (debugTypes.HasFlag(DebugTesting.Debug3_IsGrounded))
+                {
+                    // Draw a WireSphere to visualize a FeetPosition Collidier for Player Prefab for Ground & Slope Check.
+                    Vector3 feetOffset = -1 * groundCheckDistance * transform.up;
+
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawWireSphere(FeetPosition() + feetOffset, playerCollider.radius * transform.localScale.x);
+                }
+
+                if (debugTypes.HasFlag(DebugTesting.Debug4_LerpMotion))
+                {
+                    // 1. SphereCast start point (above feet to avoid clipping)
+                    Vector3 checkOrigin = FeetPosition() + transform.up * GROUND_CHECK_SPHERE_OFFSET;
+                    Vector3 feetOffset = -1 * groundCheckDistance * transform.up;
+
+                    // ----- Motion simulation -----
+                    // debugCastProgress = 0 > start, 1 > end
+                    Vector3 movingSpherePos = Vector3.Lerp(checkOrigin, FeetPosition() + feetOffset, debugCastProgress);
+                    Gizmos.color = Color.cyan; // moving sphere color
+                    Gizmos.DrawWireSphere(movingSpherePos, playerCollider.radius * transform.localScale.x);
+                }
+
             }
         }
     }
