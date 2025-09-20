@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 namespace KyanPersonalProject2025.CharacterController1
@@ -98,6 +99,8 @@ namespace KyanPersonalProject2025.CharacterController1
             {
                 rb.drag = 0f;
             }
+
+            TextStuff();
         }
 
         private void FixedUpdate()
@@ -163,15 +166,17 @@ namespace KyanPersonalProject2025.CharacterController1
                 {
                     desiredMoveSpeed = sprintSpeed;
                 }
+            }
+            bool desiredMoveSpeedHasChanged = desiredMoveSpeed != lastDesiredMoveSpeed;
 
-                bool desiredMoveSpeedHasChanged = desiredMoveSpeed != lastDesiredMoveSpeed;
+            if (lastState == MovementState.dashing)
+            {
+                keepMomentum = true;
+            }
 
-                if (lastState == MovementState.dashing)
-                {
-                    keepMomentum = true;
-                }
-
-                if (desiredMoveSpeedHasChanged)
+            if (desiredMoveSpeedHasChanged)
+            {
+                if (keepMomentum)
                 {
                     StopAllCoroutines();
                     StartCoroutine(SmoothlyLerpMoveSpeed());
@@ -181,10 +186,10 @@ namespace KyanPersonalProject2025.CharacterController1
                     StopAllCoroutines();
                     moveSpeed = desiredMoveSpeed;
                 }
-
-                lastDesiredMoveSpeed = desiredMoveSpeed;
-                lastState = state;
             }
+
+            lastDesiredMoveSpeed = desiredMoveSpeed;
+            lastState = state;
         }
 
         private float speedChangeFactor;
@@ -215,8 +220,8 @@ namespace KyanPersonalProject2025.CharacterController1
         {
             if (state == MovementState.dashing)
             {
-                Vector3 dashDir = orientation.forward;
-                rb.velocity = dashDir.normalized * dashSpeed;
+                //Vector3 dashDir = orientation.forward;
+                //rb.velocity = dashDir.normalized * dashSpeed;
                 return;
             }
 
@@ -315,6 +320,24 @@ namespace KyanPersonalProject2025.CharacterController1
         private Vector3 GetSlopeMoveDirection()
         {
             return Vector3.ProjectOnPlane(moveDirection, slopeHit.normal).normalized;
+        }
+
+        public TextMeshProUGUI text_speed;
+        public TextMeshProUGUI text_mode;
+        private void TextStuff()
+        {
+            Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+
+            if (OnSlope())
+            {
+                text_speed.SetText("Speed: " + Mathf.Round(rb.velocity.magnitude) + " / " + Mathf.Round(moveSpeed));
+            }
+            else
+            {
+                text_speed.SetText("Speed: " + Mathf.Round(flatVel.magnitude) + " / " + Mathf.Round(moveSpeed));
+            }
+
+            text_mode.SetText(state.ToString());
         }
     }
 }
