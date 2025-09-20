@@ -12,6 +12,12 @@ namespace KyanPersonalProject2025.CharacterController1
         private float moveSpeed;
         public float walkSpeed;
         public float sprintSpeed;
+        public float dashSpeed;
+
+        [Header("Dash Control")]
+        public bool dashing;
+        public float dashSpeedChangeFactor;
+        public float maxYSpeed;
 
         [Header("Drag")]
         public float groundDrag;
@@ -53,8 +59,14 @@ namespace KyanPersonalProject2025.CharacterController1
         {
             walking,
             sprinting,
+            dashing,
             air
         }
+
+        private float desiredMoveSpeed;
+        private float lastDesiredMoveSpeed;
+        private MovementState lastState;
+        private bool keepMomentum;
 
         // Start is called before the first frame update.
         private void Start()
@@ -78,7 +90,7 @@ namespace KyanPersonalProject2025.CharacterController1
             StateHandler();
 
             // Handle drag.
-            if (grounded)
+            if (state == MovementState.walking || state == MovementState.sprinting)
             {
                 rb.drag = groundDrag;
             }
@@ -117,28 +129,97 @@ namespace KyanPersonalProject2025.CharacterController1
         private void StateHandler()
         {
             // Mode - Sprinting
-            if (grounded && Input.GetKey(sprintKey))
+            if (dashing)
+            {
+                state = MovementState.dashing;
+                desiredMoveSpeed = dashSpeed;
+                speedChangeFactor = dashSpeedChangeFactor;
+            }
+
+            // Mode - Sprinting
+            else if (grounded && Input.GetKey(sprintKey))
             {
                 state = MovementState.sprinting;
-                moveSpeed = sprintSpeed;
+                desiredMoveSpeed = sprintSpeed;
             }
 
             // Mode - Walking
             else if (grounded)
             {
                 state = MovementState.walking;
-                moveSpeed = walkSpeed;
+                desiredMoveSpeed = walkSpeed;
             }
 
             // Mode - Air
             else
             {
                 state = MovementState.air;
+
+                if (desiredMoveSpeed < sprintSpeed)
+                {
+                    desiredMoveSpeed = walkSpeed;
+                }
+                else
+                {
+                    desiredMoveSpeed = sprintSpeed;
+                }
+
+                bool desiredMoveSpeedHasChanged = desiredMoveSpeed != lastDesiredMoveSpeed;
+
+                if (lastState == MovementState.dashing)
+                {
+                    keepMomentum = true;
+                }
+
+                if (desiredMoveSpeedHasChanged)
+                {
+                    StopAllCoroutines();
+                    StartCoroutine(SmoothlyLerpMoveSpeed());
+                }
+                else
+                {
+                    StopAllCoroutines();
+                    moveSpeed = desiredMoveSpeed;
+                }
+
+                lastDesiredMoveSpeed = desiredMoveSpeed;
+                lastState = state;
             }
+        }
+
+        private float speedChangeFactor;
+        private IEnumerator SmoothlyLerpMoveSpeed()
+        {
+            // smoothly lerp movementSpeed to desired value
+            float time = 0;
+            float difference = Mathf.Abs(desiredMoveSpeed - moveSpeed);
+            float startValue = moveSpeed;
+
+            float boostFactor = speedChangeFactor;
+
+            while (time < difference)
+            {
+                moveSpeed = Mathf.Lerp(startValue, desiredMoveSpeed, time / difference);
+
+                time += Time.deltaTime * boostFactor;
+
+                yield return null;
+            }
+
+            moveSpeed = desiredMoveSpeed;
+            speedChangeFactor = 1f;
+            keepMomentum = false;
         }
 
         private void MovePlayer()
         {
+            if (state == MovementState.dashing)
+            {
+                Vector3 dashDir = orientation.forward;
+                rb.velocity = dashDir.normalized * dashSpeed;
+                return;
+            }
+
             // Calculate movement direction.
             moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
 
@@ -193,6 +274,12 @@ namespace KyanPersonalProject2025.CharacterController1
 
                     velocityMagnitude = flatVel.magnitude;
                 }
+            }
+
+            // limit y vel
+            if (maxYSpeed != 0 && rb.velocity.y > maxYSpeed)
+            {
+                rb.velocity = new Vector3(rb.velocity.x, maxYSpeed, rb.velocity.z);
             }
         }
 
