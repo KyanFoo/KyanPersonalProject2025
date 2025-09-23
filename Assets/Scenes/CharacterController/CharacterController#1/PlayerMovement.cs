@@ -220,6 +220,10 @@ namespace KyanPersonalProject2025.CharacterController1
         {
             if (state == MovementState.dashing)
             {
+                // Makeshift set of code used for [Dashing].
+                //With it, the PlayerObj dashed a further distance.
+                //Without it, the PlayerObj dashed a set distance.
+
                 //Vector3 dashDir = orientation.forward;
                 //rb.velocity = dashDir.normalized * dashSpeed;
                 return;
