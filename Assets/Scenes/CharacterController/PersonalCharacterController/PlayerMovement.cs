@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
+using KyanPersonalProject2025.CharacterController1;
+using TMPro;
 using UnityEngine;
 using static KyanPersonalProject2025.CharacterController1.PlayerMovement;
 
@@ -34,14 +36,25 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("Movement Settings")]
         [SerializeField] private float walkSpeed = 7f;
         [SerializeField] private float sprintSpeed = 10f;
+        [SerializeField] private float dashSpeed = 20f;
         [SerializeField] private float airControlMultiplier = 0.4f;
         [SerializeField] private float velocityMagnitude;
 
         private float moveSpeed;
         private float minVelocity = 0.1f;
 
-        public enum MovementState { walking, sprinting, air }
+        public enum MovementState {walking, sprinting, dashing, air}
         [SerializeField] private MovementState state;
+
+        [Header("Dash Control")]
+        public bool isDashing;
+        [SerializeField] private float dashSpeedChangeFactor;
+        public float maxYSpeed;
+
+        private float desiredMoveSpeed;
+        private float lastDesiredMoveSpeed;
+        private MovementState lastState;
+        private bool keepMomentum;
 
         [Header("Drag Settings")]
         [SerializeField] private float groundDrag = 6f;
@@ -109,6 +122,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             {
                 pressedJump = true;
             }
+            TextStuff();
         }
 
         private void FixedUpdate()
@@ -143,26 +157,100 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         private void StateHandler()
         {
             // Mode - Sprinting
-            if (isGrounded && Input.GetKey(sprintKey))
+            if (isDashing)
+            {
+                state = MovementState.dashing;
+                desiredMoveSpeed = dashSpeed;
+                speedChangeFactor = dashSpeedChangeFactor;
+            }
+            // Mode - Sprinting
+            else if (isGrounded && Input.GetKey(sprintKey))
             {
                 state = MovementState.sprinting;
-                moveSpeed = sprintSpeed;
+                desiredMoveSpeed = sprintSpeed;
             }
             // Mode - Walking
             else if (isGrounded)
             {
                 state = MovementState.walking;
-                moveSpeed = walkSpeed;
+                desiredMoveSpeed = walkSpeed;
             }
             // Mode - Air
             else
             {
                 state = MovementState.air;
+
+                if (desiredMoveSpeed < sprintSpeed)
+                {
+                    desiredMoveSpeed = walkSpeed;
+                }
+                else
+                {
+                    desiredMoveSpeed = sprintSpeed;
+                }
             }
+            bool desiredMoveSpeedHasChanged = desiredMoveSpeed != lastDesiredMoveSpeed;
+
+            if (lastState == MovementState.dashing)
+            {
+                keepMomentum = true;
+            }
+
+            if (desiredMoveSpeedHasChanged)
+            {
+                if (keepMomentum)
+                {
+                    StopAllCoroutines();
+                    StartCoroutine(SmoothlyLerpMoveSpeed());
+                }
+                else
+                {
+                    StopAllCoroutines();
+                    moveSpeed = desiredMoveSpeed;
+                }
+            }
+
+            lastDesiredMoveSpeed = desiredMoveSpeed;
+            lastState = state;
+        }
+
+        private float speedChangeFactor;
+        private IEnumerator SmoothlyLerpMoveSpeed()
+        {
+            // smoothly lerp movementSpeed to desired value
+            float time = 0;
+            float difference = Mathf.Abs(desiredMoveSpeed - moveSpeed);
+            float startValue = moveSpeed;
+
+            float boostFactor = speedChangeFactor;
+
+            while (time < difference)
+            {
+                moveSpeed = Mathf.Lerp(startValue, desiredMoveSpeed, time / difference);
+
+                time += Time.deltaTime * boostFactor;
+
+                yield return null;
+            }
+
+            moveSpeed = desiredMoveSpeed;
+            speedChangeFactor = 1f;
+            keepMomentum = false;
         }
 
         private void GroundMovement()
         {
+            if (state == MovementState.dashing)
+            {
+                // Makeshift set of code used for [Dashing].
+                //With it, the PlayerObj dashed a further distance.
+                //Without it, the PlayerObj dashed a set distance.
+
+                //Vector3 dashDir = orientation.forward;
+                //rb.velocity = dashDir.normalized * dashSpeed;
+                return;
+            }
+
             Vector3 dir = Vector3.zero;
             dir = orientation.forward * verticalInput + orientation.right * horizontalInput;
             finalDir = dir.normalized;
@@ -214,12 +302,18 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
         private void ControlDrag()
         {
-            if (isGrounded && isSlopeSteep)
+
+            if (isDashing)
+            {
+                // Skip friction when dashing.
+                playerRigidbody.drag = 0f;
+            }
+            else if (isGrounded && isSlopeSteep)
             {
                 // Apply lower drag when sliding
                 playerRigidbody.drag = slidingDrag;
             }
-            if (isGrounded)
+            else if (isGrounded)
             {
                 // Apply higher drag to help stop quickly on the ground
                 playerRigidbody.drag = groundDrag;
@@ -233,6 +327,9 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
         private void SpeedControl()
         {
+            // Ignore ALL speed control when dashing
+            if (isDashing) return;
+
             Vector3 flatVel = new Vector3(playerRigidbody.velocity.x, 0f, playerRigidbody.velocity.z);
 
             // Limit velocity to max moveSpeed
@@ -244,15 +341,24 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
             velocityMagnitude = flatVel.magnitude; // optional: for debugging or UI
 
+            // limit y vel
+            if (maxYSpeed != 0 && playerRigidbody.velocity.y > maxYSpeed)
+            {
+                playerRigidbody.velocity = new Vector3(playerRigidbody.velocity.x, maxYSpeed, playerRigidbody.velocity.z);
+            }
+
             // Apply friction when idle on ground
             if (finalDir == Vector3.zero && isGrounded)
             {
+                Debug.Log("Control2");
                 if (playerRigidbody.velocity.magnitude < minVelocity)
                 {
+                    Debug.Log("Control3");
                     playerRigidbody.velocity = Vector3.zero;
                 }
                 else
                 {
+                    Debug.Log("Control4");
                     // Apply friction opposite to velocity
                     Vector3 frictionForce = -playerRigidbody.velocity.normalized * groundDrag;
                     playerRigidbody.AddForce(frictionForce);
@@ -418,6 +524,23 @@ namespace KyanPersonalProject2025.PersonalCharacterController
                 }
 
             }
+        }
+        public TextMeshProUGUI text_speed;
+        public TextMeshProUGUI text_mode;
+        private void TextStuff()
+        {
+            Vector3 flatVel = new Vector3(playerRigidbody.velocity.x, 0f, playerRigidbody.velocity.z);
+
+            if (OnSlope())
+            {
+                text_speed.SetText("Speed: " + Mathf.Round(playerRigidbody.velocity.magnitude) + " / " + Mathf.Round(moveSpeed));
+            }
+            else
+            {
+                text_speed.SetText("Speed: " + Mathf.Round(flatVel.magnitude) + " / " + Mathf.Round(moveSpeed));
+            }
+
+            text_mode.SetText(state.ToString());
         }
     }
 }

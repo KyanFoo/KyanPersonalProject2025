@@ -4580,7 +4580,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1349559927
 Transform:
   m_ObjectHideFlags: 0
@@ -4940,6 +4940,7 @@ GameObject:
   - component: {fileID: 1425547776}
   - component: {fileID: 1425547775}
   - component: {fileID: 1425547777}
+  - component: {fileID: 1425547778}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -5036,9 +5037,13 @@ MonoBehaviour:
   sensY: 150
   walkSpeed: 7
   sprintSpeed: 10
+  dashSpeed: 20
   airControlMultiplier: 0.4
   velocityMagnitude: 0
   state: 0
+  isDashing: 0
+  dashSpeedChangeFactor: 80
+  maxYSpeed: 0
   groundDrag: 6
   airDrag: 2
   slidingDrag: 1
@@ -5058,9 +5063,37 @@ MonoBehaviour:
   slideForce: 4
   jumpKey: 32
   sprintKey: 304
-  debug: 1
+  debug: 0
   debugTypes: 0
   debugCastProgress: 0
+  text_speed: {fileID: 1861204470}
+  text_mode: {fileID: 302660786}
+--- !u!114 &1425547778
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1425547773}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ded118545358d145b5b56711ccba535, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  orientation: {fileID: 823063806}
+  playerCam: {fileID: 1078986893}
+  rb: {fileID: 0}
+  pm: {fileID: 0}
+  dashForce: 20
+  dashUpwardForce: 0
+  maxDashYSpeed: 15
+  dashDuration: 0.25
+  useCameraForward: 0
+  allowAllDirections: 1
+  disableGravity: 0
+  resetVel: 1
+  dashCd: 1.5
+  dashKey: 101
 --- !u!1 &1429352114
 GameObject:
   m_ObjectHideFlags: 0
@@ -7752,7 +7785,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7455978342532151121, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -2.4
       objectReference: {fileID: 0}
     - target: {fileID: 7455978342532151121, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_LocalPosition.y
