@@ -1,0 +1,325 @@
+<<-----PersonalCharacterController.README----->>
+------------------------------------------------
+
+- These are README notes of how I created my [PersonalCharacterController].
+- I based it on several YouTube tutorials, then added my own edits and improvements.
+- Each function comes from a reference controller or my own idea. 
+- Here, I explain what each function does, why I used it, and how I edited it.
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[InputManagement();]
+-----------------------------------
+Reference: [PlayerController#2], Edited
+
+[InputManagement();]
+- Gathers input from [WASD keys] for movement and [Mouse] for camera look.
+
+Why I implement this:
+---------------------
+From [PlayerController#2]: 
+- The method is simple and compact.  
+- All input code is in one place, which makes it easier to manage.  
+
+From [Personal Edit]:
+- I only renamed some variables to match other parts of my controller.
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[CameraMovement();]
+-----------------------------------
+Reference: [PlayerController#1] &  [PlayerController#2], Edited
+
+[CameraMovement();] 
+- Uses mouse input to rotate both the player and camera in the same direction.
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:  
+- I adapted the rotation system with xRotation and yRotation values.
+- These values sync the player body and Cinemachine camera for smooth rotation.  
+
+From [PlayerController#2]:  
+- Works well with Cinemachine, which I use in my project.  
+
+From [Personal Edit]:
+- I used [playerBody.rotation] instead of [transform.rotation].
+	- This avoids rotating the whole player object incorrectly. 
+	- Only yRotation applies to the body, which makes the rotation smooth and accurate.
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[FeetPosition();]
+-----------------------------------
+Reference: [PlayerController#4]
+
+[FeetPosition();]
+- Calculate the world position of the player’s feet, no matter the collider shape or size.
+
+Why I implement this:
+---------------------
+Reference: [PlayerController#4]
+- More reliable than using the capsule collider directly.  
+- Works for different models and ensures consistent ground detection.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[IsGrounded();]
+-----------------------------------
+Reference: [PlayerController#4], Edited(ChatGPT)
+
+[IsGrounded();]
+- Uses [FeetPosition()] with a spherecast to check if the player is standing on the ground.
+
+Why I implement this:
+---------------------
+From [PlayerController#4]:
+- This function works seamlessly with [FeetPosition()], making the check **safer and more accurate**.
+- Works better on uneven terrain compared to a single raycast.  
+- A raycast can fail near edges, but this method is more robust.  
+
+From [Personal Edit]:
+- The original code flickered between true/false while moving sideways.
+	- I fixed it by starting the spherecast above the ground and extending its length.  
+	- This ensures stable ground detection with no flicker.
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[StateHandler();]
+-----------------------------------
+Reference: [PlayerController#1]
+
+[StateHandler();] 
+- Manages the player’s movement states (walking, running, dashing, in-air).
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:   
+- Keeps movement states organized.  
+- Versatile, easy to add new states later (wall climbing, crouching, stealth).  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[SmoothlyLerpMoveSpeed();]
+-----------------------------------
+Reference: [PlayerController#1]
+
+[SmoothlyLerpMoveSpeed();]
+- Smoothly changes movement speed instead of instantly snapping.  
+- Preserves momentum when leaving sprint or dash states.
+
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:  
+- Makes transitions smoother and movement feel more natural.   
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[ControlDrag();]
+-----------------------------------
+Reference: [PlayerController#1], [PlayerController#3], [Edit(ChatGPT)]
+
+[ControlDrag();]  
+- Adjusts Rigidbody drag depending on ground surface or air state.
+
+Why I implement this:
+---------------------
+From [PlayerController#3]:
+- Prevents sliding endlessly on the ground.  
+- Ground drag makes movement feel solid.  
+- Air drag is lighter, allowing natural falling. 
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[SpeedControl();]
+-----------------------------------
+Reference: [PlayerController#1], [PlayerController#4], [Edit(ChatGPT)]
+
+[SpeedControl();]
+- Limits horizontal speed so it never exceeds [moveSpeed].
+- Handles stopping smoothly to prevent sliding forever.
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:
+- Keeps velocity under [moveSpeed]. Prevents infinite acceleration.  
+
+From [PlayerController#4]:
+- Adds friction when not moving, so the player slows down gradually.  
+
+From [Edit(ChatGPT)]
+- Ignore SpeedControl() when dashing, prevent from slowing it down.
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[Jump();]
+-----------------------------------
+Reference: [PlayerController#4]
+
+[Jump();]
+- Applies upward force to make the player jump.
+
+Why I implement this:
+---------------------
+From [PlayerController#4]:
+- More polished than simple jump scripts.  
+- Checks velocity before applying force.  
+- Works well with grounded checks for consistent jumps.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[OnSlope();]
+-----------------------------------
+Reference: Edited(ChatGPT)
+
+[OnSlope();]
+- Detects slope angle using a raycast near the feet.
+- Checks if slope is walkable or too steep.
+
+Why I implement this:
+---------------------
+From [Personal Edit]:
+- Combines methods from [Controller#1] and [Controller#4].  
+- Uses slope angle to decide if it’s safe to walk.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[GetSlopeMoveDirection();]
+-----------------------------------
+Reference: [PlayerController#1], Edited(ChatGPT)
+
+[GetSlopeMoveDirection();]
+- Projects movement direction along the slope surface.
+- Ensures the player moves *with* the slope, not into it.
+
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:
+- Works with OnSlope() for climbing up slopes.  
+
+From [Personal Edit]:
+- This function is the combination of [CharacterController#1] and [CharacterController#4] OnSlope() functions for reliable slope movement.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[IsTooSteep();]
+-----------------------------------
+Reference: [Edit(ChatGPT)]
+
+[IsTooSteep();]
+- Checks if the player is on a slope steeper than [maxSlopeAngle].
+- Steep is [True], not steep is [False].
+
+Why I implement this:
+---------------------
+From [Personal Edit]:
+- Gravity alone wasn’t reliable for steep slopes.  
+- This check makes climbing and sliding easier to control.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[GetSlopeSlideDirection();]
+-----------------------------------
+Reference: [Edit(ChatGPT)]
+
+[GetSlopeSlideDirection();]
+- Projects sliding direction down the slope surface.
+- Sliding speed depends on slope angle (steeper = faster).
+
+Why I implement this:
+---------------------
+From [Personal Edit]:
+- Based on GetSlopeMoveDirection(), but reversed for downslope.  
+- Adds realism with gradual sliding on moderate slopes and fast sliding on steep ones.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[GroundMovement();]
+-----------------------------------
+Reference: [PlayerController#1], [PlayerController#4], Edited(ChatGPT)
+
+[GroundMovement();]
+- Handles movement logic for different terrains: ground, slope, and air.
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:
+- Gave me the base idea for general movement.  
+
+From [PlayerController#4]:
+- More detailed implementation for real movement behavior.  
+
+From [Personal Edit]:
+- Added slope sliding logic for steep surfaces.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[ExtraGravity();] ??
+-----------------------------------
+Reference: [PlayerController#1], [PlayerController#4], Edited(ChatGPT)
+
+[ExtraGravity();]
+- Adds extra downward force on top of Unity’s gravity.
+- Applies temporary extra gravity when stepping off slopes to prevent floaty behavior.
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:
+- Adjusts gravity without changing Unity’s global settings.  
+
+From [PlayerController#4]:
+- Adds stronger gravity after leaving slopes for smoother falling.  
+
+From [Personal Edit]:
+- Default gravity felt too floaty, so I tuned it with this function.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[OnDrawGizmos();]
+-----------------------------------
+Reference: [PlayerController#4], Edited(ChatGPT)
+
+[OnDrawGizmos();]
+- Draws wireframes for colliders and checks.
+- Used for debugging.
+
+
+Why I implement this:
+---------------------
+From [PlayerController#4]:
+- Helps visualize what the code is doing in the scene view.  
+
+From [Personal Edit]:
+- Expanded the gizmo visuals for easier debugging.  
+
+------------------------------------------------------------------------------------------------------------>
+
+-----------------------------------
+[TextStuff();]
+-----------------------------------
+Reference: [PlayerController#1]
+
+[TextStuff();]
+- Updates UI text for debugging (velocity, state, jumps left).
+
+Why I implement this:
+---------------------
+From [PlayerController#1]:
+- Helps track controller performance in real time.  
+- Cleaner than spamming the console with debug logs.
+
