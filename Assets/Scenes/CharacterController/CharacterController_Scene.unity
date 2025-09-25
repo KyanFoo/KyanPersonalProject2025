@@ -5047,6 +5047,9 @@ MonoBehaviour:
   groundDrag: 6
   airDrag: 2
   slidingDrag: 1
+  targetGravity: -24
+  extraGravity: 2
+  extraGravityTimeAfterSlope: 0.3
   jumpForce: 12
   maxJumps: 1
   pressedJump: 0
@@ -7781,11 +7784,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4874822498983468910, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7455978342532151121, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2.4
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7455978342532151121, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_LocalPosition.y

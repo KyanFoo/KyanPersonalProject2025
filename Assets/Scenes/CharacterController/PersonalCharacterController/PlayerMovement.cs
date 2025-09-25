@@ -1,10 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using Cinemachine;
-using KyanPersonalProject2025.CharacterController1;
 using TMPro;
 using UnityEngine;
-using static KyanPersonalProject2025.CharacterController1.PlayerMovement;
 
 namespace KyanPersonalProject2025.PersonalCharacterController
 {
@@ -60,6 +58,11 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [SerializeField] private float groundDrag = 6f;
         [SerializeField] private float airDrag = 2f;
         [SerializeField] private float slidingDrag = 1f;
+
+        [Header("Gravity Control Settings")]
+        [SerializeField] private float targetGravity = -15f;
+        [SerializeField] private float extraGravity = 2f;
+        [SerializeField] private float extraGravityTimeAfterSlope = 0.3f;
 
         [Header("Jump Settings")]
         [SerializeField] private float jumpForce = 12f;
@@ -140,6 +143,8 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             {
                 jumpsLeft = maxJumps; // Reset jump count when grounded
             }
+
+            ExtraGravity(); // Apply gravity modifications
 
             if (pressedJump)
             {
@@ -281,6 +286,24 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             {
                 // Airborne movement
                 playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+            }
+        }
+
+        private void ExtraGravity()
+        {
+            // --- Calculate gravity difference based on targetGravity ---
+            // Example: if Physics.gravity.y = -9.81 and targetGravity = -20,
+            // extraGravityToApply = -20 - (-9.81) = -10.19
+            float extraGravityToApply = targetGravity - Physics.gravity.y;
+
+            // Apply base gravity adjustment so the player always experiences targetGravity
+            playerRigidbody.AddForce(Vector3.up * extraGravityToApply, ForceMode.Acceleration);
+
+            // --- Apply extra gravity after leaving a slope ---
+            if (!pressedJump && !(isGrounded && slopeAngle <= maxSlopeAngle) && Time.time < lastTimeOnSlope + extraGravityTimeAfterSlope)
+            {
+                // Stack additional gravity force
+                playerRigidbody.AddForce(Physics.gravity * extraGravity, ForceMode.Acceleration);
             }
         }
 
