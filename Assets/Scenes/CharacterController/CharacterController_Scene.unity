@@ -5878,7 +5878,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1569936319
 Transform:
   m_ObjectHideFlags: 0
@@ -7136,6 +7136,7 @@ GameObject:
   - component: {fileID: 1912117814}
   - component: {fileID: 1912117816}
   - component: {fileID: 1912117815}
+  - component: {fileID: 1912117817}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -7211,6 +7212,34 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!114 &1912117817
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912117813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3d22e5771a42be47b2963cc35d1a554, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  virtualCamera: {fileID: 1149907247}
+  playerBody: {fileID: 1912117814}
+  playerRigidbody: {fileID: 1912117816}
+  playerCollider: {fileID: 1912117815}
+  orientation: {fileID: 739626582}
+  sensX: 150
+  sensY: 150
+  multiplier: 1
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheckDistance: 0.05
+  isGrounded: 0
+  debug: 1
+  debugTypes: 4
+  debugCastProgress: 0
 --- !u!1 &1939707253
 GameObject:
   m_ObjectHideFlags: 0
