@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace KyanPersonalProject2025.PersonalCharacterController
+namespace KyanPersonalProject2025.PersonalCharacterControllerDiscard
 {
     public class Dashing : MonoBehaviour
     {

@@ -4,7 +4,7 @@ using Cinemachine;
 using TMPro;
 using UnityEngine;
 
-namespace KyanPersonalProject2025.PersonalCharacterController
+namespace KyanPersonalProject2025.PersonalCharacterControllerDiscard
 {
     public class PlayerMovement : MonoBehaviour
     {
