@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Cinemachine;
 using UnityEngine;
 
@@ -27,11 +26,50 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         private float xRotation;
         private float yRotation;
 
+        private Vector3 finalDir;
+
+        [Header("Movement Settings")]
+        [SerializeField] private float walkSpeed = 7f;
+        [SerializeField] private float sprintSpeed = 10f;
+        [SerializeField] private float dashSpeed = 20f;
+        [SerializeField] private float airControlMultiplier = 0.4f;
+        [SerializeField] private float velocityMagnitude;
+
+        private float moveSpeed;
+        private float minVelocity = 0.1f;
+
+        [Header("MovementState Settings")]
+        [SerializeField] private MovementState state;
+        public enum MovementState { walking, sprinting, dashing, air }
+
+        [Header("Dash Control")]
+        public bool isDashing;
+        [SerializeField] private float dashSpeedChangeFactor;
+        public float maxYSpeed;
+
+        private float desiredMoveSpeed;
+        private float lastDesiredMoveSpeed;
+        private MovementState lastState;
+        private bool keepMomentum;
+        private float speedChangeFactor;
+
+        [Header("Drag Settings")]
+        [SerializeField] private float groundDrag = 5f;
+        [SerializeField] private float airDrag = 2f;
+
+        [Header("Gravity Control Settings")]
+        [SerializeField] private float targetGravity = -24f;
+        [SerializeField] private float extraGravity = 2f;
+
         [Header("GroundCheck Settings")]
         [SerializeField] private LayerMask groundMask;
         [SerializeField] private float groundCheckDistance = 0.05f;
         private const float GROUND_CHECK_SPHERE_OFFSET = 0.05f;
         public bool isGrounded;
+
+        [Header("Keybinds")]
+        public KeyCode jumpKey = KeyCode.Space;
+        public KeyCode sprintKey = KeyCode.LeftShift;
 
         [Header("DebugDraw Settings")]
         public bool debug = false;
@@ -58,12 +96,177 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         public void Update()
         {
             InputManagement();
+            SpeedControl();
+            StateHandler();
             CameraMovement();
         }
 
         private void FixedUpdate()
         {
             isGrounded = CheckGrounded();
+
+            ExtraGravity();
+
+            ControlDrag();
+        }
+
+        private void StateHandler()
+        {
+            // --- Dashing State ---
+            if (isDashing)
+            {
+                state = MovementState.dashing;
+                desiredMoveSpeed = dashSpeed;
+                speedChangeFactor = dashSpeedChangeFactor;
+            }
+
+            // --- Sprinting State ---
+            else if (isGrounded && Input.GetKey(sprintKey))
+            {
+                state = MovementState.sprinting;
+                desiredMoveSpeed = sprintSpeed;
+            }
+
+            // --- Walking State ---
+            else if (isGrounded)
+            {
+                state = MovementState.walking;
+                desiredMoveSpeed = walkSpeed;
+            }
+
+            // --- Air State (jumping/falling) ---
+            else
+            {
+                state = MovementState.air;
+
+                // If current desired speed is below sprint threshold, default to walk speed.
+                if (desiredMoveSpeed < sprintSpeed)
+                {
+                    desiredMoveSpeed = walkSpeed;
+                }
+                else
+                {
+                    desiredMoveSpeed = sprintSpeed;
+                }
+            }
+
+            // Check if desired speed has changed compared to last frame.
+            bool desiredMoveSpeedHasChanged = desiredMoveSpeed != lastDesiredMoveSpeed;
+
+            // Preserve momentum when coming out of a dash.
+            if (lastState == MovementState.dashing)
+            {
+                keepMomentum = true;
+            }
+
+            // Handle speed transitions.
+            if (desiredMoveSpeedHasChanged)
+            {
+                if (keepMomentum)
+                {
+                    // Smoothly transition to new speed.
+                    StopAllCoroutines();
+                    StartCoroutine(SmoothlyLerpMoveSpeed());
+                }
+                else
+                {
+                    // Instantly snap to new speed.
+                    StopAllCoroutines();
+                    moveSpeed = desiredMoveSpeed;
+                }
+            }
+
+            // Store state for next frame checks.
+            lastDesiredMoveSpeed = desiredMoveSpeed;
+            lastState = state;
+        }
+
+        private IEnumerator SmoothlyLerpMoveSpeed()
+        {
+            // smoothly lerp movementSpeed to desired value
+            float time = 0;
+            float difference = Mathf.Abs(desiredMoveSpeed - moveSpeed);
+            float startValue = moveSpeed;
+
+            float boostFactor = speedChangeFactor;
+
+            while (time < difference)
+            {
+                // Lerp speed based on elapsed time.
+                moveSpeed = Mathf.Lerp(startValue, desiredMoveSpeed, time / difference);
+
+                time += Time.deltaTime * boostFactor;
+
+                yield return null;
+            }
+
+            // Final snap to desired value.
+            moveSpeed = desiredMoveSpeed;
+            speedChangeFactor = 1f;
+            keepMomentum = false;
+        }
+
+        private void ExtraGravity()
+        {
+            float extraGravityToApply = targetGravity - Physics.gravity.y;
+
+            playerRigidbody.AddForce(Vector3.up * extraGravityToApply, ForceMode.Acceleration);
+        }
+
+
+        private void ControlDrag()
+        {
+            if (isDashing)
+            {
+                // Disable drag during dashing for max distance.
+                playerRigidbody.drag = 0f;
+            }
+            else if (isGrounded)
+            {
+                // Normal ground drag, help stop quickly on the ground.
+                playerRigidbody.drag = groundDrag;
+            }
+            else
+            {
+                // Air drag, allowing smoother falling and air movement.
+                playerRigidbody.drag = airDrag;
+            }
+        }
+
+        private void SpeedControl()
+        {
+            if (isDashing)
+            {
+                return;
+            }
+
+            Vector3 flatVel = new Vector3(playerRigidbody.velocity.x, 0f, playerRigidbody.velocity.z);
+
+            if (flatVel.magnitude > moveSpeed)
+            {
+                Vector3 limitedVel = flatVel.normalized * moveSpeed;
+                playerRigidbody.velocity = new Vector3(limitedVel.x, playerRigidbody.velocity.y, limitedVel.z);
+
+                velocityMagnitude = flatVel.magnitude;
+            }
+
+            if (maxYSpeed != 0 && playerRigidbody.velocity.y > maxYSpeed)
+            {
+                playerRigidbody.velocity = new Vector3(playerRigidbody.velocity.x, maxYSpeed, playerRigidbody.velocity.z);
+            }
+
+            if (finalDir == Vector3.zero && CheckGrounded())
+            {
+                if (playerRigidbody.velocity.magnitude < minVelocity)
+                {
+                    playerRigidbody.velocity = Vector3.zero;
+                }
+                else
+                {
+                    Vector3 frictionForce = -1 * playerRigidbody.velocity.normalized * groundDrag;
+                    playerRigidbody.AddForce(frictionForce);
+                }
+            }
         }
 
         private void CameraMovement()

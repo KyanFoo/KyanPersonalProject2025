@@ -2957,6 +2957,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2804413976790739181, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
+      propertyPath: groundDrag
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 2804413976790739181, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: whatIsGround.m_Bits
       value: 8
       objectReference: {fileID: 0}
@@ -2966,11 +2970,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4874822498983468910, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7455978342532151121, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -2.02
       objectReference: {fileID: 0}
     - target: {fileID: 7455978342532151121, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_LocalPosition.y
@@ -4144,6 +4148,7 @@ GameObject:
   - component: {fileID: 501110345}
   - component: {fileID: 501110344}
   - component: {fileID: 501110347}
+  - component: {fileID: 501110348}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4238,14 +4243,53 @@ MonoBehaviour:
   orientation: {fileID: 626839681}
   sensX: 150
   sensY: 150
+  walkSpeed: 7
+  sprintSpeed: 10
+  dashSpeed: 20
+  airControlMultiplier: 0.4
+  velocityMagnitude: 0
+  state: 0
+  isDashing: 0
+  dashSpeedChangeFactor: 80
+  maxYSpeed: 0
+  groundDrag: 6
+  airDrag: 2
+  targetGravity: -24
+  extraGravity: 2
   groundMask:
     serializedVersion: 2
     m_Bits: 8
   groundCheckDistance: 0.05
   isGrounded: 0
+  jumpKey: 32
+  sprintKey: 304
   debug: 1
   debugTypes: 4
   debugCastProgress: 0
+--- !u!114 &501110348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 501110343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 440822ead50f12843b6eaa85c75385f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  orientation: {fileID: 626839681}
+  playerCam: {fileID: 1897483999}
+  dashForce: 20
+  dashUpwardForce: 0
+  maxDashYSpeed: 15
+  dashDuration: 0.25
+  useCameraForward: 1
+  allowAllDirections: 1
+  disableGravity: 0
+  resetVel: 1
+  dashCd: 1.5
+  dashKey: 101
 --- !u!1 &572915651
 GameObject:
   m_ObjectHideFlags: 0
