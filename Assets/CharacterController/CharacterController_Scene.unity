@@ -4243,6 +4243,9 @@ MonoBehaviour:
     m_Bits: 8
   groundCheckDistance: 0.05
   isGrounded: 0
+  debug: 1
+  debugTypes: 4
+  debugCastProgress: 0
 --- !u!1 &572915651
 GameObject:
   m_ObjectHideFlags: 0
