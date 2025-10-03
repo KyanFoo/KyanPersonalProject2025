@@ -255,7 +255,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
                 playerRigidbody.velocity = new Vector3(playerRigidbody.velocity.x, maxYSpeed, playerRigidbody.velocity.z);
             }
 
-            if (finalDir == Vector3.zero && CheckGrounded())
+            if (isDashing && finalDir == Vector3.zero && CheckGrounded())
             {
                 if (playerRigidbody.velocity.magnitude < minVelocity)
                 {
