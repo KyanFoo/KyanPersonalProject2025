@@ -4254,7 +4254,7 @@ MonoBehaviour:
   maxYSpeed: 0
   groundDrag: 6
   airDrag: 2
-  targetGravity: -24
+  targetGravity: -30
   extraGravity: 2
   groundMask:
     serializedVersion: 2

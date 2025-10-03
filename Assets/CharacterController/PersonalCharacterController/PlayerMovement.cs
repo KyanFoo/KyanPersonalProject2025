@@ -107,6 +107,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
             ExtraGravity();
 
+            GroundMovement();
             ControlDrag();
         }
 
@@ -204,6 +205,33 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             moveSpeed = desiredMoveSpeed;
             speedChangeFactor = 1f;
             keepMomentum = false;
+        }
+
+        private void GroundMovement()
+        {
+            if (state == MovementState.dashing)
+            {
+                return;
+            }
+
+            Vector3 dir = Vector3.zero;
+            dir = orientation.forward * verticalInput + orientation.right * horizontalInput;
+            finalDir = dir.normalized;
+
+            if (debug)
+            {
+                Debug.DrawLine(FeetPosition(), FeetPosition() + finalDir * 25f, Color.green);
+            }
+
+            
+            if (isGrounded)
+            {
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+            }
+            else
+            {
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+            }
         }
 
         private void ExtraGravity()
