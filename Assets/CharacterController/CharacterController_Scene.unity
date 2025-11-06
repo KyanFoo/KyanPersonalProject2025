@@ -4305,6 +4305,9 @@ MonoBehaviour:
   isGrounded: 0
   spawnKey: 102
   resetKey: 114
+  debug: 1
+  debugTypes: 4
+  debugCastProgress: 0
 --- !u!114 &1154494270
 MonoBehaviour:
   m_ObjectHideFlags: 0
