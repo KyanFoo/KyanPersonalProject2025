@@ -4494,6 +4494,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: CharacterControl#4
       objectReference: {fileID: 0}
+    - target: {fileID: 3369582543518722268, guid: 46ced837a5c2f6c499efd0b87c895f51, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
