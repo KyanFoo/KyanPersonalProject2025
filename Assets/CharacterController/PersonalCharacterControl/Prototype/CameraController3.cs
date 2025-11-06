@@ -18,6 +18,9 @@ namespace KyanPersonalProject2025.Prototype
         private float xRotation = 0f;
         private float yRotation = 0f;
 
+        [Header("Keybinds")]
+        public KeyCode resetKey = KeyCode.Space;
+
         void Update()
         {
             // Get mouse input
@@ -35,7 +38,7 @@ namespace KyanPersonalProject2025.Prototype
             // Rotate player mesh horizontally
             playerMesh.localRotation = Quaternion.Euler(0f, yRotation, 0f);
 
-            if (Input.GetButtonDown("Jump"))
+            if (Input.GetKey(resetKey))
             {
                 ResetPlayerState();
             }
