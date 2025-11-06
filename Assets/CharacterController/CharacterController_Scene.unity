@@ -1253,6 +1253,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2804413976790739181, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
+      propertyPath: targetGravity
+      value: -30
+      objectReference: {fileID: 0}
     - target: {fileID: 4874822498983468910, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_Name
       value: CharacterControl#1
@@ -4255,6 +4259,7 @@ GameObject:
   - component: {fileID: 1154494271}
   - component: {fileID: 1154494270}
   - component: {fileID: 1154494269}
+  - component: {fileID: 1154494274}
   m_Layer: 0
   m_Name: PlayerRoot
   m_TagString: Untagged
@@ -4294,6 +4299,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerRigidbody: {fileID: 1154494273}
   playerCollider: {fileID: 1154494272}
+  walkSpeed: 7
+  sprintSpeed: 10
+  dashSpeed: 20
+  airControlMultiplier: 0.4
+  velocityMagnitude: 0
+  state: 0
+  isDashing: 0
+  dashSpeedChangeFactor: 0
+  maxYSpeed: 0
+  groundDrag: 5
+  airDrag: 2
+  targetGravity: -24
+  extraGravity: 2
   spawnPosition: {x: 0, y: 0, z: 0}
   spawnHeightOffset: 1.5
   freezeMovementOnSpawn: 1
@@ -4305,6 +4323,7 @@ MonoBehaviour:
   isGrounded: 0
   spawnKey: 102
   resetKey: 114
+  sprintKey: 304
   debug: 1
   debugTypes: 4
   debugCastProgress: 0
@@ -4392,6 +4411,30 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!114 &1154494274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1154494267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87e29a0189f7d8440aeee1dfd33f52b0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  orientation: {fileID: 1416850069}
+  playerCam: {fileID: 686782944}
+  dashForce: 20
+  dashUpwardForce: 0
+  maxDashYSpeed: 15
+  dashDuration: 0.25
+  useCameraForward: 1
+  allowAllDirections: 1
+  disableGravity: 0
+  resetVel: 1
+  dashCd: 1.5
+  dashKey: 101
 --- !u!43 &1160440908
 Mesh:
   m_ObjectHideFlags: 0
