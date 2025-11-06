@@ -4298,6 +4298,11 @@ MonoBehaviour:
   spawnHeightOffset: 1.5
   freezeMovementOnSpawn: 1
   canMove: 0
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 8
+  groundCheckDistance: 0.05
+  isGrounded: 0
   spawnKey: 102
   resetKey: 114
 --- !u!114 &1154494270

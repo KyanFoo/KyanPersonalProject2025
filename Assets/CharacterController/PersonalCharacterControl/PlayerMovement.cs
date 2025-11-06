@@ -16,6 +16,12 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         public bool freezeMovementOnSpawn = true;    // Prevent control until grounded
         public bool canMove = false;
 
+        [Header("GroundCheck Settings")]
+        [SerializeField] private LayerMask groundMask;
+        [SerializeField] private float groundCheckDistance = 0.05f;
+        private const float GROUND_CHECK_SPHERE_OFFSET = 0.05f;
+        public bool isGrounded;
+
         [Header("Keybinds")]
         public KeyCode spawnKey = KeyCode.F;
         public KeyCode resetKey = KeyCode.R;
@@ -53,6 +59,11 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             }   
         }
 
+        private void FixedUpdate()
+        {
+            isGrounded = CheckGrounded();
+        }
+
         public void ResetPlayerState(Vector3 newPosition, bool freeze = false)
         {
             // --- RESET PHYSICS ---
@@ -76,6 +87,20 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             yield return new WaitForSeconds(delay);
             playerRigidbody.isKinematic = false;
             canMove = true;
+        }
+
+        private Vector3 FeetPosition()
+        {
+            Vector3 sphereOffset = (playerCollider.height * transform.localScale.y / 2 - playerCollider.radius * transform.localScale.x) * -1 * transform.up;
+            Vector3 feetPosition = playerRigidbody.position + sphereOffset;
+            return feetPosition;
+        }
+
+        private bool CheckGrounded()
+        {
+            Vector3 checkOrigin = FeetPosition() + transform.up * GROUND_CHECK_SPHERE_OFFSET;
+            float checkDistance = groundCheckDistance + GROUND_CHECK_SPHERE_OFFSET;
+            return Physics.SphereCast(checkOrigin, playerCollider.radius * transform.localScale.x, -transform.up, out RaycastHit _, checkDistance, groundMask);
         }
     }
 }
