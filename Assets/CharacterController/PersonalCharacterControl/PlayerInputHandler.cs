@@ -10,6 +10,10 @@ public class PlayerInputHandler : MonoBehaviour
     [HideInInspector] public float verticalInput;
     [HideInInspector] public float horizontalInput;
 
+    [Header("Keybinds")]
+    public KeyCode jumpKey = KeyCode.Space;
+    [HideInInspector] public bool jumpPressed;
+
     // Update is called once per frame
     void Update()
     {
@@ -23,5 +27,7 @@ public class PlayerInputHandler : MonoBehaviour
 
         mouseX = Input.GetAxisRaw("Mouse X");
         mouseY = Input.GetAxisRaw("Mouse Y");
+
+        jumpPressed = Input.GetKey(jumpKey);
     }
 }

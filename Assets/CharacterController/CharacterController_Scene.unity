@@ -4299,6 +4299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerRigidbody: {fileID: 1154494273}
   playerCollider: {fileID: 1154494272}
+  playerInputHandler: {fileID: 1154494271}
   walkSpeed: 7
   sprintSpeed: 10
   dashSpeed: 20
@@ -4312,6 +4313,10 @@ MonoBehaviour:
   airDrag: 2
   targetGravity: -24
   extraGravity: 2
+  jumpForce: 12
+  maxJumps: 1
+  jumpsLeft: 0
+  pressedJump: 0
   spawnPosition: {x: 0, y: 0, z: 0}
   spawnHeightOffset: 1.5
   freezeMovementOnSpawn: 1
@@ -4361,6 +4366,8 @@ MonoBehaviour:
   mouseY: 0
   verticalInput: 0
   horizontalInput: 0
+  jumpKey: 32
+  jumpPressed: 0
 --- !u!136 &1154494272
 CapsuleCollider:
   m_ObjectHideFlags: 0

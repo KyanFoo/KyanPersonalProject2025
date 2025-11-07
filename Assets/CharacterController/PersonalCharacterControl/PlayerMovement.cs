@@ -9,6 +9,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("References")]
         public Rigidbody playerRigidbody;
         public CapsuleCollider playerCollider;
+        public PlayerInputHandler playerInputHandler;
 
         [Header("Movement Settings")]
         [SerializeField] private float walkSpeed = 7f;
@@ -42,6 +43,13 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("Gravity Control Settings")]
         [SerializeField] private float targetGravity = -24f;
         [SerializeField] private float extraGravity = 2f;
+
+        [Header("Jump Settings")]
+        [SerializeField] private float jumpForce = 12f;     // Force applied on jump
+        [SerializeField] private int maxJumps = 1;          // Max jump count (1 = single, 2 = double, etc.)
+
+        public int jumpsLeft;                              // Number of remaining jumps.
+        public bool pressedJump;
 
         [Header("Spawn Settings")]
         public Vector3 spawnPosition = Vector3.zero; // Custom spawn position
@@ -79,6 +87,8 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
         void Start()
         {
+            jumpsLeft = maxJumps;   // Initialize jump count.
+
             // Initialize Rigidbody if not assigned
             if (!playerRigidbody)
             {
@@ -111,13 +121,36 @@ namespace KyanPersonalProject2025.PersonalCharacterController
 
             SpeedControl();
             StateHandler();
+
+
+            // Jump key is pressed,
+            if (playerInputHandler.jumpPressed)
+            {
+                pressedJump = true;     // Buffer jump input.
+            }
         }
 
         private void FixedUpdate()
         {
             isGrounded = CheckGrounded();
 
+            // Reset jumps when grounded.
+            if (isGrounded)
+            {
+                jumpsLeft = maxJumps; // Reset jump count when grounded.
+            }
+
             ExtraGravity();
+
+            // Handle jump request.
+            if (pressedJump)
+            {
+                pressedJump = false;
+                if (isGrounded || jumpsLeft > 0)
+                {
+                    Jump(); // Perform jump if allowed
+                }
+            }
 
             ControlDrag();
         }
@@ -278,6 +311,25 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             float extraGravityToApply = targetGravity - Physics.gravity.y;
 
             playerRigidbody.AddForce(Vector3.up * extraGravityToApply, ForceMode.Acceleration);
+        }
+
+        private void Jump()
+        {
+            // Reset vertical velocity.
+            Vector3 velocity = playerRigidbody.velocity;
+            velocity.y = 0;
+            playerRigidbody.velocity = velocity;
+
+            // Add upward jump force.
+            playerRigidbody.AddForce(jumpForce * Vector3.up, ForceMode.VelocityChange);
+
+            // If not grounded, consume a jump (for multi-jumps).
+            if (!isGrounded)
+            {
+                //jumpsLeft--; // Reduce available jumps if mid-air.
+            }
+
+            jumpsLeft--; // Reduce available jumps if mid-air.
         }
 
         public void ResetPlayerState(Vector3 newPosition, bool freeze = false)
