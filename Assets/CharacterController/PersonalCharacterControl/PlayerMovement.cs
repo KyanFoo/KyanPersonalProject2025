@@ -9,6 +9,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("References")]
         public Rigidbody playerRigidbody;
         public CapsuleCollider playerCollider;
+        public Transform orientation;
         public PlayerInputHandler playerInputHandler;
 
         [Header("Movement Settings")]
@@ -152,6 +153,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
                 }
             }
 
+            GroundMovement();
             ControlDrag();
         }
 
@@ -249,6 +251,43 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             moveSpeed = desiredMoveSpeed;
             speedChangeFactor = 1f;
             keepMomentum = false;
+        }
+
+        private void GroundMovement()
+        {
+            if (state == MovementState.dashing)
+            {
+                // Makeshift set of code used for [Dashing].
+                //With it, the PlayerObj dashed a further distance.
+                //Without it, the PlayerObj dashed a set distance.
+
+                //Vector3 dashDir = orientation.forward;
+                //rb.velocity = dashDir.normalized * dashSpeed;
+                return;
+            }
+
+            // --- Calculate desired direction ---
+            Vector3 dir = Vector3.zero;
+            dir = orientation.forward * playerInputHandler.verticalInput + orientation.right * playerInputHandler.horizontalInput;
+            finalDir = dir.normalized;  // Normalize to avoid diagonal speed boost.
+
+            // Debug draw movement direction.
+            if (debug)
+            {
+                Debug.DrawLine(FeetPosition(), FeetPosition() + finalDir * 25f, Color.green);
+            }
+
+            // --- Apply movement forces based on state ---
+            if (isGrounded)
+            {
+                // Normal flat ground movement.
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
+            }
+            else
+            {
+                // Airborne movement.
+                playerRigidbody.AddForce(finalDir * moveSpeed * 10f * airControlMultiplier, ForceMode.Force);
+            }
         }
 
         private void ControlDrag()

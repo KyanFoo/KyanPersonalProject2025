@@ -1263,7 +1263,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4874822498983468910, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7455978342532151121, guid: 8080e7ce55b6d4f4eb3855fc71d66842, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4299,6 +4299,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerRigidbody: {fileID: 1154494273}
   playerCollider: {fileID: 1154494272}
+  orientation: {fileID: 1416850069}
   playerInputHandler: {fileID: 1154494271}
   walkSpeed: 7
   sprintSpeed: 10
