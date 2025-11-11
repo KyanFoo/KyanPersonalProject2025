@@ -44,6 +44,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("Gravity Control Settings")]
         [SerializeField] private float targetGravity = -24f;
         [SerializeField] private float extraGravity = 2f;
+        [SerializeField] private float extraGravityTimeAfterSlope = 0.3f;
 
         [Header("Jump Settings")]
         [SerializeField] private float jumpForce = 12f;     // Force applied on jump
@@ -63,6 +64,17 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [SerializeField] private float groundCheckDistance = 0.05f;
         private const float GROUND_CHECK_SPHERE_OFFSET = 0.05f;
         public bool isGrounded;
+
+        [Header("Slope Handling Settings")]
+        [SerializeField] private float maxSlopeAngle = 45f;     // Max slope angle considered walkable.
+        [SerializeField] private float maxSlideForce = 20f;     // Force applied when sliding down a steep slope.
+
+        public bool isOnSlope;                                  // True, if on walkable slope.
+        public bool isSlopeSteep;                               // True, if slope is too steep.
+        public float slopeAngle;                                // Measured angle of current slope.
+        private RaycastHit slopeHit;                            // Stores slope raycast hit info.
+        private float lastTimeOnSlope;                          // Used for slope exit gravity handling.
+        public float slideForce;
 
         [Header("Keybinds")]
         public KeyCode spawnKey = KeyCode.F;
@@ -134,6 +146,13 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         private void FixedUpdate()
         {
             isGrounded = CheckGrounded();
+            isOnSlope = OnSlope();
+
+            // If grounded on slope, record timestamp for slope-exit gravity.
+            if (isGrounded && slopeAngle >= 0 && isOnSlope)
+            {
+                lastTimeOnSlope = Time.time; // Record slope timestamp.
+            }
 
             // Reset jumps when grounded.
             if (isGrounded)
@@ -277,8 +296,13 @@ namespace KyanPersonalProject2025.PersonalCharacterController
                 Debug.DrawLine(FeetPosition(), FeetPosition() + finalDir * 25f, Color.green);
             }
 
+            if (isGrounded && isOnSlope)
+            {
+                // Move along slope.
+                playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
+            }
             // --- Apply movement forces based on state ---
-            if (isGrounded)
+            else if (isGrounded)
             {
                 // Normal flat ground movement.
                 playerRigidbody.AddForce(finalDir * moveSpeed * 10f, ForceMode.Force);
@@ -350,6 +374,13 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             float extraGravityToApply = targetGravity - Physics.gravity.y;
 
             playerRigidbody.AddForce(Vector3.up * extraGravityToApply, ForceMode.Acceleration);
+
+            // --- Apply extra gravity after leaving a slope ---
+            if (!pressedJump && !(isGrounded && slopeAngle <= maxSlopeAngle) && Time.time < lastTimeOnSlope + extraGravityTimeAfterSlope)
+            {
+                // Stack additional gravity force.
+                playerRigidbody.AddForce(Physics.gravity * extraGravity, ForceMode.Acceleration);
+            }
         }
 
         private void Jump()
@@ -408,6 +439,38 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             Vector3 checkOrigin = FeetPosition() + transform.up * GROUND_CHECK_SPHERE_OFFSET;
             float checkDistance = groundCheckDistance + GROUND_CHECK_SPHERE_OFFSET;
             return Physics.SphereCast(checkOrigin, playerCollider.radius * transform.localScale.x, -transform.up, out RaycastHit _, checkDistance, groundMask);
+        }
+
+        private bool OnSlope()
+        {
+            // --- Get the origin point for slope check (bottom of the capsule) ---
+            Vector3 origin = FeetPosition();
+
+            // --- Calculate dynamic raycast distance ---
+            float distance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+
+            // --- Perform a downward raycast from feet position ---
+            if (Physics.Raycast(origin, Vector3.down, out slopeHit, distance))
+            {
+                // --- Calculate the angle between the surface normal and world up ---
+                slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+
+                // Return true only if within valid slope range
+                return slopeAngle > 0f && slopeAngle <= maxSlopeAngle;
+            }
+
+            // --- Reset slope angle if no valid hit detected ---
+            slopeAngle = 0f;
+
+            // True if on a slope and within acceptable angle; otherwise, false
+            return false;
+        }
+
+        private Vector3 GetSlopeMoveDirection(Vector3 moveDir)
+        {
+            // Projects movement direction onto the slope plane using the surface normal
+            // This ensures the player moves along the surface and not into it
+            return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
         }
 
         private void OnDrawGizmos() // --- Debug gizmos for visualizing ground check ---

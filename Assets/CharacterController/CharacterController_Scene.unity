@@ -4314,6 +4314,7 @@ MonoBehaviour:
   airDrag: 2
   targetGravity: -24
   extraGravity: 2
+  extraGravityTimeAfterSlope: 0.3
   jumpForce: 12
   maxJumps: 1
   jumpsLeft: 0
@@ -4327,6 +4328,12 @@ MonoBehaviour:
     m_Bits: 8
   groundCheckDistance: 0.05
   isGrounded: 0
+  maxSlopeAngle: 45
+  maxSlideForce: 20
+  isOnSlope: 0
+  isSlopeSteep: 0
+  slopeAngle: 0
+  slideForce: 0
   spawnKey: 102
   resetKey: 114
   sprintKey: 304
