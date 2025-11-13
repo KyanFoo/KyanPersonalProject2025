@@ -68,6 +68,8 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         [Header("Slope Handling Settings")]
         [SerializeField] private float maxSlopeAngle = 45f;     // Max slope angle considered walkable.
         [SerializeField] private float maxSlideForce = 20f;     // Force applied when sliding down a steep slope.
+        public float slopeStickStrength;
+        [SerializeField, Range(40f, 80f)] private float assistThreshold = 40f;
 
         public bool isOnSlope;                                  // True, if on walkable slope.
         public bool isSlopeSteep;                               // True, if slope is too steep.
@@ -374,6 +376,20 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             float extraGravityToApply = targetGravity - Physics.gravity.y;
 
             playerRigidbody.AddForce(Vector3.up * extraGravityToApply, ForceMode.Acceleration);
+
+            if (isGrounded && slopeAngle <= maxSlopeAngle && slopeAngle > 0f)
+            {
+                Vector3 gravityDir = Physics.gravity.normalized;
+                Vector3 slopeNormal = slopeHit.normal;
+                Vector3 gravityAlongSlope = Vector3.ProjectOnPlane(gravityDir, slopeNormal);
+
+                // Anti-slide assist: increase stick force as slope gets steeper
+                float t = Mathf.InverseLerp(assistThreshold, 90f, slopeAngle);
+                float dynamicStick = Mathf.Lerp(1f, slopeStickStrength, t);
+
+                // Apply counter-gravity along slope to hold player in place
+                playerRigidbody.AddForce(-gravityAlongSlope * Physics.gravity.magnitude * dynamicStick, ForceMode.Acceleration);
+            }
 
             // --- Apply extra gravity after leaving a slope ---
             if (!pressedJump && !(isGrounded && slopeAngle <= maxSlopeAngle) && Time.time < lastTimeOnSlope + extraGravityTimeAfterSlope)
