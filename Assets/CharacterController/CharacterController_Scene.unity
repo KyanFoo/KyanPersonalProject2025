@@ -4330,6 +4330,8 @@ MonoBehaviour:
   isGrounded: 0
   maxSlopeAngle: 45
   maxSlideForce: 20
+  slopeStickStrength: 4
+  assistThreshold: 40
   isOnSlope: 0
   isSlopeSteep: 0
   slopeAngle: 0

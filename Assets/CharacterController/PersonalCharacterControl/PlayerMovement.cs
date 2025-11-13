@@ -149,6 +149,7 @@ namespace KyanPersonalProject2025.PersonalCharacterController
         {
             isGrounded = CheckGrounded();
             isOnSlope = OnSlope();
+            isSlopeSteep = IsTooSteep();
 
             // If grounded on slope, record timestamp for slope-exit gravity.
             if (isGrounded && slopeAngle >= 0 && isOnSlope)
@@ -297,8 +298,14 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             {
                 Debug.DrawLine(FeetPosition(), FeetPosition() + finalDir * 25f, Color.green);
             }
+            if (isGrounded && isSlopeSteep)
+            {
+                // Sliding on steep slope.
+                playerRigidbody.AddForce(GetSlopeSlideDirection(), ForceMode.Force);
 
-            if (isGrounded && isOnSlope)
+                playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
+            }
+            else if (isGrounded && isOnSlope)
             {
                 // Move along slope.
                 playerRigidbody.AddForce(GetSlopeMoveDirection(dir) * moveSpeed * 10f, ForceMode.Force);
@@ -487,6 +494,39 @@ namespace KyanPersonalProject2025.PersonalCharacterController
             // Projects movement direction onto the slope plane using the surface normal
             // This ensures the player moves along the surface and not into it
             return Vector3.ProjectOnPlane(moveDir, slopeHit.normal).normalized;
+        }
+
+        private bool IsTooSteep()
+        {
+            // True if too steep to walk on; otherwise, false
+            return slopeAngle > maxSlopeAngle;
+        }
+
+        private Vector3 GetSlopeSlideDirection()
+        {
+            // Get the origin point for the slope check (bottom of capsule)
+            Vector3 origin = FeetPosition();
+
+            float distance = playerCollider.height * 0.5f * transform.localScale.y + 0.3f;
+
+            // Perform a raycast straight downward to detect the surface below the player
+            if (Physics.Raycast(origin, Vector3.down, out slopeHit, distance))
+            {
+                // Calculate the angle between the hit normal and world up (i.e., how steep the surface is)
+                slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+
+                if (slopeAngle > maxSlopeAngle)
+                {
+                    float t = Mathf.InverseLerp(maxSlopeAngle, 70f, slopeAngle); // Tweak 70f if needed
+                    slideForce = Mathf.Lerp(30f, maxSlideForce, t); // Adds a minimum slide nudge
+
+                    //slideForce = Mathf.Lerp(0f, maxSlideForce, (slopeAngle - maxSlopeAngle) / (70f - maxSlopeAngle));
+                    Vector3 slideDir = Vector3.ProjectOnPlane(Vector3.down, slopeHit.normal).normalized;
+                    return slideDir * slideForce;
+                }
+            }
+
+            return Vector3.zero; // No sliding needed
         }
 
         private void OnDrawGizmos() // --- Debug gizmos for visualizing ground check ---
